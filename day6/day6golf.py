@@ -1,0 +1,2 @@
+print('Part 1 answer:', [i+4 for i in range(len(open('input.txt', 'r').readline())) if len(set(open('input.txt', 'r').readline()[i:i+4])) == 4][0])
+print('Part 2 answer:', [i+14 for i in range(len(open('input.txt', 'r').readline())) if len(set(open('input.txt', 'r').readline()[i:i+14])) == 14][0])
