@@ -1,106 +1,111 @@
 class Node():
+  """
+  Node class which represents a file on a file system. It implements a bidirectional
+  tree like structure to allow for easy traversal up and down the tree, which is particularly
+  useful in commands like `cd ..` or `cd x-directory`.
+
+  @param str name: The name of the file or directory
+  @param Node parent: The parent directory (default=None)
+  @param int size: The size of the file; directories should have a size of 0 (default=0)
+  """
   def __init__(self, name, parent=None, size=0):
     self.name = name
     self.parent = parent
     self.size = size
+
     self.is_dir = self.size == 0
     self.children = []
-  
-  def get_info(self):
-    return f'{self.name} ({"dir" if self.is_dir else self.size}) - parent: {self.parent.name if self.parent else "ROOT"}'
 
+  # DFS search to compute size of a node (file/dir)
   def get_size(self):
     total = int(self.size)
     for child in self.children:
       total += child.get_size()
     return total
 
-  def display_tree(self, dir_only=False, depth=0):
-    size = self.get_size()
-    if self.is_dir:
-      print(f'{"  " *  depth}- {self.name} (dir, size={size})')
-      for child in self.children:
-        child.display_tree(dir_only, depth+1)
-    elif not self.is_dir and not dir_only:
-      print(f'{"  " * depth}- {self.name} (file, size={size})')
+  # Display files in tree like structure (like example on AOC)
+  def display_tree(self, depth=0):
+    # Display file information in format:
+    # - filename (filetype, size=xxxxxx)
+    print(f'{"  " *  depth}- {self.name} ({"dir" if self.is_dir else "file"}, size={self.get_size()})')
+
+    # Recursively call children to display their own subtrees
+    for child in self.children:
+      child.display_tree(depth+1)
+
     return ''
-  
+
+  # Consider two nodes equivalent if they have the same name, parent, and file type
+  # This allows multiple files with the same name to be in different directories,
+  # and files with the same name as its parent directory
   def __eq__(self, other):
       return self.name == other.name\
-          and self.size == other.size\
           and self.parent == other.parent\
           and self.is_dir == other.is_dir
 
 with open('input.txt', 'r') as f:
   lines = f.readlines()
 
+# Keep track of all files/directories (i.e. nodes) within the system
 nodes = []
-curr_node = None
+# Keep track of our current directory
+working_dir = None
 
 for line in lines:
   split = line.strip().split(' ')
+
   # Command
   if split[0] == '$':
+    # Changing directories
     if split[1] == 'cd':
-      dir = split[2]
-      temp_node = Node(name=dir, parent=curr_node)
+      target_dir = split[2]
+
+      # Create a temporary node used for comparisons
+      temp_node = Node(name=target_dir, parent=working_dir)
+
       # Go up a directory - use current node's parent
-      if dir == '..':
-        curr_node = curr_node.parent
+      if target_dir == '..':
+        working_dir = working_dir.parent
+
       # Go to an existing directory in our knowledge base
-      elif hasattr(curr_node, 'children') and temp_node in curr_node.children:
-        curr_node = [x for x in curr_node.children if x == temp_node][0]
+      elif hasattr(working_dir, 'children') and temp_node in working_dir.children:
+        working_dir = [x for x in working_dir.children if x == temp_node][0]
+
       # We are cding into a new directory - add it to our knowledge base
       else:
-        curr_node = Node(name=dir, parent=curr_node)
-        nodes.append(curr_node)
-        # print(f'cd to {dir} (NEW)')
-      
+        working_dir = Node(name=target_dir, parent=working_dir)
+        nodes.append(working_dir)
+
   # A file has been encountered (i.e. it is the output of an ls command)
   else:
-    # print(f'ls command reached - currently in {curr_node.name}')
     file_size, file_name = line.strip().split(' ')
-    temp_node = Node(name=file_name, parent=curr_node) if file_size == 'dir' else Node(size=file_size, name=file_name, parent=curr_node)
+    temp_node = Node(name=file_name, parent=working_dir) if file_size == 'dir' else Node(size=file_size, name=file_name, parent=working_dir)
     if temp_node not in nodes:
-      # print(f'new node found: {temp_node.name}')
       nodes.append(temp_node)
-    if temp_node not in curr_node.children:
-      # print(f'new child found: {temp_node.name}')
-      curr_node.children.append(temp_node)
-      # print(f'{curr_node.name} is parent of {split[1]}')
-    # print('nodes:', nodes)
-    # print(f'children of {curr_node.name}: {curr_node.children}')
-    # print()
+    if temp_node not in working_dir.children:
+      working_dir.children.append(temp_node)
 
-# for node in nodes:
-#   print(node.get_info())
-
-# for node in nodes:
-#   print(node)
-
-# print([node.name for node in nodes])
-# print(nodes[0].display_tree())
-# print([node for node in nodes])
-
+# Find the sum of all directory nodes with size <= 100000
 total_part1 = 0
 for node in nodes:
   size = node.get_size()
-  if node.is_dir and size <= 100000:
+  if node.is_dir and size <= 100_000:
     total_part1 += size
 
 ### Part 2 ###
-total_disk = 70_000_000
-required_unused_space = 30_000_000
+# Space allocations (given in the question)
+TOTAL_DISK = 70_000_000
+REQUIRED_UNUSED_SPACE = 30_000_000
+# Total size of our system - assumes that the first node is root (/)
 used_disk = nodes[0].get_size()
-smallest_deletable_size = used_disk - (total_disk-required_unused_space)
-deletable_files = []
-for node in nodes:
-  if node.is_dir and node.get_size() >= smallest_deletable_size:
-    deletable_files.append(node)
+# Compute how much space we need to free up
+required_deletion_size = used_disk - (TOTAL_DISK-REQUIRED_UNUSED_SPACE)
+# Compute the smallest file that meets the given requirements
+smallest_deletable_size = min([node.get_size() for node in nodes if node.is_dir and node.get_size() >= required_deletion_size])
+##############
 
-# smallest_deletable_file = deletable_files.sort(key=lambda x: x.get_size())
-smallest_deletable_file = sorted(deletable_files, key=lambda x: x.get_size())[0]
-
+# The following will display the full file system structure - assuming the first node is the root (/)
+# nodes[0].display_tree()
 
 print('Part 1 answer:', total_part1, 1581595)
-print('Part 2 answer:', smallest_deletable_file.get_size(), 1544176)
+print('Part 2 answer:', smallest_deletable_size, 1544176)
