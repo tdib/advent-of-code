@@ -1,6 +1,6 @@
 from math import prod
 
-with open('test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
   lines = f.readlines()
 
 lines = [list(map(int, [*line.strip()])) for line in lines]
@@ -57,38 +57,55 @@ def get_scenic_score(tree_pos):
   right_diff = len(lines[0]) - c - 1
 
   total_up = 0
+  tops = []
   for i in range(1, top_diff+1):
-    # if len(tops) == 0 or lines[r-i][c] > tops[-1]:
-    #   tops.append(lines[r-i][c])
-    if not lines[r-i][c] > lines[r][c]:
+    # if len(tops) == 0 or lines[r-i][c] < lines[r][c] or tops[0] < lines[r][c]:
+      # tops.append(lines[r-i][c])
+      # total_up += 1
+
+    if lines[r-i][c] < lines[r][c]:
       print('up', lines[r-i][c])
       total_up += 1
     else:
+      total_up += 1
       break
   
   total_down = 0
+  bots = []
   for i in range(1, bot_diff+1):
-    if not lines[r+i][c] > lines[r][c]:
+    # if len(bots) == 0 or lines[r+i][c] < lines[r][c] or bots[0] < lines[r][c]:
+    #   bots.append(lines[r+i][c])
+    #   total_down += 1
+
+    if lines[r+i][c] < lines[r][c]:
       print('down', lines[r+i][c])
       total_down += 1
     else:
+      total_down += 1
       break
 
   total_left = 0
+  lefts = []
   for i in range(1, left_diff+1):
-    if not lines[r][c-i] > lines[r][c]:
-      print('left', lines[r][c-i])
+    # if len(lefts) == 0 or lines[r][c-i] < lines[r][c] or lefts[0] < lines[r][c]:
+    if lines[r][c-i] < lines[r][c]:
+      # print('left', lines[r][c-i])
+      lefts.append(lines[r][c-i])
       total_left += 1
     else:
+      total_left += 1
       break
   
-  # rights = []
+  rights = []
   total_right = 0
   for i in range(1, right_diff+1):
-    if not lines[r][c+i] > lines[r][c]:
+    # if len(rights) == 0 or lines[r][c+i] < lines[r][c] or rights[0] < lines[r][c]:
+    if lines[r][c+i] < lines[r][c]:
+      rights.append(lines[r][c+i])
       print('right', lines[r][c+i])
       total_right += 1
     else:
+      total_right += 1
       break
 
   x = prod([total_up, total_down, total_left, total_right])
@@ -103,4 +120,4 @@ for i in range(len(lines)):
     scenic_scores.append(get_scenic_score((i, j)))
 
 print('Part 1 answer:', len(visible))
-print('Part 1 answer:', max(scenic_scores))
+print('Part 2 answer:', max(scenic_scores))
