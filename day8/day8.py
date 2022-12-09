@@ -50,6 +50,12 @@ for row, line in enumerate(lines_transposed):
 
 ### Part 2 ###
 def get_scenic_score(tree_pos):
+  """
+  Compute the scenic score of a tree in a given position. The scenic score is defined as
+  the product of the number of visible trees in each direction (up, down, left, right).
+
+  @param tuple tree_pos: row, column coordinate of the tree to compute the score for
+  """
   # Extract row and column index from tree_pos tuple
   r, c = tree_pos
 
@@ -59,6 +65,7 @@ def get_scenic_score(tree_pos):
   left_diff = c
   right_diff = len(lines[0]) - c - 1
 
+  # Compute the number of visible trees for the tree position (up)
   total_up = 0
   for i in range(1, top_diff+1):
     if lines[r-i][c] < lines[r][c]:
@@ -67,6 +74,7 @@ def get_scenic_score(tree_pos):
       total_up += 1
       break
   
+  # Compute the number of visible trees for the tree position (down)
   total_down = 0
   for i in range(1, bottom_diff+1):
     if lines[r+i][c] < lines[r][c]:
@@ -75,6 +83,7 @@ def get_scenic_score(tree_pos):
       total_down += 1
       break
 
+  # Compute the number of visible trees for the tree position (left)
   total_left = 0
   for i in range(1, left_diff+1):
     if lines[r][c-i] < lines[r][c]:
@@ -83,6 +92,7 @@ def get_scenic_score(tree_pos):
       total_left += 1
       break
   
+  # Compute the number of visible trees for the tree position (right)
   total_right = 0
   for i in range(1, right_diff+1):
     if lines[r][c+i] < lines[r][c]:
@@ -91,6 +101,7 @@ def get_scenic_score(tree_pos):
       total_right += 1
       break
 
+  # Compute the product of the number of visible trees in each direction
   return prod([total_up, total_down, total_left, total_right])
 
 # Iterate through each of the trees, finding the highest scenic score overall
