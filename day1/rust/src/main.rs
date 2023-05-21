@@ -1,7 +1,7 @@
 use std::fs::read_to_string;
 
 fn main() {
-  let input: String = read_to_string("input.txt").unwrap();
+  let input: String = read_to_string("../input.txt").unwrap();
 
   let mut sum_vec: Vec<usize> = Vec::new();
   let mut curr_sum: usize = 0;
