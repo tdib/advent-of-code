@@ -24,19 +24,20 @@ fn main() {
 
     // Split all rucksacks into chunks of 3, find the common characters, and sum the value across all characters
     const CHUNK_SIZE: usize = 3;
-    let chunks = rucksacks.chunks(CHUNK_SIZE);
-    let mut part_2_sum = 0;
-    for chunk in chunks {
-        part_2_sum += get_char_score(
-            *return_common_char(chunk.iter().map(|&s| s.to_string()).collect())
-                .iter()
-                .next()
-                .unwrap(),
-        );
-    }
+    let part_2_sum: usize = rucksacks
+        .chunks(CHUNK_SIZE)
+        .map(|chunk| {
+            get_char_score(
+                *return_common_char(chunk.iter().map(|&s| s.to_string()).collect())
+                    .iter()
+                    .next()
+                    .unwrap(),
+            )
+        })
+        .sum();
 
     println!("The answer for part 1 is {}", part_1_sum);
-    println!("The answer for part 2 is {:?}", part_2_sum);
+    println!("The answer for part 2 is {}", part_2_sum);
 }
 
 ///
