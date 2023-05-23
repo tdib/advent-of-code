@@ -63,6 +63,7 @@ fn get_char_score(c: char) -> usize {
         _ => panic!("Invalid char"),
     }
 }
+
 /// Computes the intersection character(s) of multiple strings
 ///
 /// # Arguments
