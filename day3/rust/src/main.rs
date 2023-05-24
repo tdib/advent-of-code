@@ -8,13 +8,17 @@ fn main() {
 
     // Split each rucksack into two halves, find the common characters, and sum the value across all characters
     let part_1_sum: usize = rucksacks
-        .iter()
+        .clone()
+        .into_iter()
         .map(|rucksack| {
             get_char_score(
-                *return_common_char(vec![
-                    rucksack[0..rucksack.len() / 2].to_string(),
-                    rucksack[rucksack.len() / 2..].to_string(),
-                ])
+                *get_common_char(
+                    vec![
+                        &rucksack[0..rucksack.len() / 2],
+                        &rucksack[rucksack.len() / 2..],
+                    ]
+                    .as_slice(),
+                )
                 .iter()
                 .next()
                 .unwrap(),
@@ -26,14 +30,7 @@ fn main() {
     const CHUNK_SIZE: usize = 3;
     let part_2_sum: usize = rucksacks
         .chunks(CHUNK_SIZE)
-        .map(|chunk| {
-            get_char_score(
-                *return_common_char(chunk.iter().map(|&s| s.to_string()).collect())
-                    .iter()
-                    .next()
-                    .unwrap(),
-            )
-        })
+        .map(|chunk| get_char_score(*get_common_char(chunk).iter().next().unwrap()))
         .sum();
 
     println!("The answer for part 1 is {}", part_1_sum);
@@ -72,17 +69,20 @@ fn get_char_score(c: char) -> usize {
 /// # Example
 /// ```
 /// let strings = vec!["abc", "bcd", "cde"];
-/// let intersection = return_common_char_2(strings); // returns 'c'
+/// let intersection = get_common_char(strings); // returns 'c'
+/// assert_eq!(intersection, HashSet::from_iter(vec!['c'].iter()));
 /// ```
 ///
-fn return_common_char(strings: Vec<String>) -> HashSet<char> {
-    let common_chars: HashSet<char> = strings[0].chars().collect();
-
-    strings[1..].iter().fold(common_chars, |common_chars, new| {
-        let new_set: HashSet<char> = new.chars().collect();
-        common_chars
-            .intersection(&new_set)
-            .copied()
-            .collect::<HashSet<char>>()
-    })
+/// ```
+/// let strings = vec!["abc", "bdd"];
+/// let intersection = get_common_char(strings); // returns 'b'
+/// assert_eq!(intersection, HashSet::from_iter(vec!['b'].iter()));
+/// ```
+///
+fn get_common_char(strings: &[&str]) -> HashSet<char> {
+    strings
+        .iter()
+        .map(|str| HashSet::from_iter(str.chars()))
+        .reduce(|acc, val| acc.intersection(&val).cloned().collect())
+        .unwrap_or_default()
 }
