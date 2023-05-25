@@ -1,7 +1,6 @@
 use std::cmp::Ordering;
 use std::{fs::read_to_string, ops::RangeInclusive};
 
-#[derive(Debug)]
 struct ElfPair {
     first: RangeInclusive<usize>,
     second: RangeInclusive<usize>,
@@ -24,10 +23,14 @@ impl ElfPair {
         ElfPair { first, second }
     }
 
+    // Determine whether the two ranges overlap completely
+    // We only need to check the first range as it either starts before the second, or is larger than the second
     fn contains_full_overlap(&self) -> bool {
         self.first.contains(self.second.start()) && self.first.contains(self.second.end())
     }
 
+    // Determine whether there is any overlap between the two ranges
+    // We only need to check the first range as it either starts before (or equal to) the second
     fn contains_partial_overlap(&self) -> bool {
         self.first.end() >= self.second.start()
     }
@@ -37,6 +40,7 @@ trait RangeInclusiveExt {
     fn from_str(range_str: &str) -> RangeInclusive<usize>;
 }
 
+// Convert a string of the form "1-2" into a RangeInclusive<usize>
 impl RangeInclusiveExt for RangeInclusive<usize> {
     fn from_str(range_str: &str) -> RangeInclusive<usize> {
         let (lower_bound, upper_bound) = range_str.split_once('-').unwrap();
