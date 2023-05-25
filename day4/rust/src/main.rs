@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::{fs::read_to_string, ops::RangeInclusive};
 
 #[derive(Debug)]
@@ -7,20 +8,24 @@ struct ElfPair {
 }
 
 impl ElfPair {
+    // Creates a new ElfPair, where the first range is always the larger of the two
     fn new(first: RangeInclusive<usize>, second: RangeInclusive<usize>) -> Self {
-        let (first, second) = if first.start() > second.start() {
-            (second, first)
-        } else {
-            (first, second)
+        let (first, second) = match first.start().cmp(second.start()) {
+            Ordering::Less => (first, second),
+            Ordering::Equal => {
+                if first.end() > second.end() {
+                    (first, second)
+                } else {
+                    (second, first)
+                }
+            }
+            Ordering::Greater => (second, first),
         };
         ElfPair { first, second }
     }
 
     fn contains_full_overlap(&self) -> bool {
-        // Second is contained within first
-        (self.first.start() <= self.second.start() && self.first.end() >= self.second.end())
-        // First is contained within the second
-            || (self.second.start() <= self.first.start() && self.second.end() >= self.first.end())
+        self.first.contains(self.second.start()) && self.first.contains(self.second.end())
     }
 
     fn contains_partial_overlap(&self) -> bool {
@@ -50,7 +55,6 @@ fn main() {
                 RangeInclusive::from_str(first_range),
                 RangeInclusive::from_str(second_range),
             );
-
             pair.contains_full_overlap()
         })
         .filter(|&has_overlap| has_overlap)
