@@ -29,7 +29,7 @@ impl ElfPair {
     }
 
     fn contains_partial_overlap(&self) -> bool {
-        todo!()
+        self.first.end() >= self.second.start()
     }
 }
 
@@ -47,7 +47,7 @@ impl RangeInclusiveExt for RangeInclusive<usize> {
 fn main() {
     let input = read_to_string("../input.txt").unwrap();
 
-    let part_1_sum = input
+    let part_1_sum: usize = input
         .lines()
         .map(|line| {
             let (first_range, second_range) = line.split_once(',').unwrap();
@@ -60,5 +60,19 @@ fn main() {
         .filter(|&has_overlap| has_overlap)
         .count();
 
+    let part_2_sum: usize = input
+        .lines()
+        .map(|line| {
+            let (first_range, second_range) = line.split_once(',').unwrap();
+            let pair: ElfPair = ElfPair::new(
+                RangeInclusive::from_str(first_range),
+                RangeInclusive::from_str(second_range),
+            );
+            pair.contains_partial_overlap()
+        })
+        .filter(|&has_overlap| has_overlap)
+        .count();
+
     println!("The answer for part 1 is {}", part_1_sum);
+    println!("The answer for part 2 is {}", part_2_sum);
 }
