@@ -1,47 +1,56 @@
-use std::fs::read_to_string;
+use std::{fs::read_to_string, ops::RangeInclusive};
 
 #[derive(Debug)]
 struct ElfPair {
-    first: CustomRange,
-    second: CustomRange,
+    first: RangeInclusive<usize>,
+    second: RangeInclusive<usize>,
 }
 
 impl ElfPair {
+    fn new(first: RangeInclusive<usize>, second: RangeInclusive<usize>) -> Self {
+        let (first, second) = if first.start() > second.start() {
+            (second, first)
+        } else {
+            (first, second)
+        };
+        ElfPair { first, second }
+    }
+
     fn contains_full_overlap(&self) -> bool {
-        // First completely contains second
-        (self.first.start <= self.second.start && self.first.end >= self.second.end)
-        // Second completely contains first
-        || (self.second.start <= self.first.start && self.second.end >= self.first.end)
+        // Second is contained within first
+        (self.first.start() <= self.second.start() && self.first.end() >= self.second.end())
+        // First is contained within the second
+            || (self.second.start() <= self.first.start() && self.second.end() >= self.first.end())
+    }
+
+    fn contains_partial_overlap(&self) -> bool {
+        todo!()
     }
 }
 
-#[derive(Debug)]
-struct CustomRange {
-    start: usize,
-    end: usize,
+trait RangeInclusiveExt {
+    fn from_str(range_str: &str) -> RangeInclusive<usize>;
 }
 
-impl CustomRange {
-    fn from_str(range_str: &str) -> Self {
-        let mut range = range_str.split('-').map(|x| x.parse::<usize>().unwrap());
-        CustomRange {
-            start: range.next().unwrap(),
-            end: range.next().unwrap(),
-        }
+impl RangeInclusiveExt for RangeInclusive<usize> {
+    fn from_str(range_str: &str) -> RangeInclusive<usize> {
+        let (lower_bound, upper_bound) = range_str.split_once('-').unwrap();
+        lower_bound.parse().unwrap()..=upper_bound.parse().unwrap()
     }
 }
 
 fn main() {
     let input = read_to_string("../input.txt").unwrap();
 
-    let part_1_sum: usize = input
+    let part_1_sum = input
         .lines()
         .map(|line| {
             let (first_range, second_range) = line.split_once(',').unwrap();
-            let pair: ElfPair = ElfPair {
-                first: CustomRange::from_str(first_range),
-                second: CustomRange::from_str(second_range),
-            };
+            let pair: ElfPair = ElfPair::new(
+                RangeInclusive::from_str(first_range),
+                RangeInclusive::from_str(second_range),
+            );
+
             pair.contains_full_overlap()
         })
         .filter(|&has_overlap| has_overlap)
