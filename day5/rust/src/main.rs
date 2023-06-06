@@ -4,7 +4,7 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 struct Crate(char);
 impl Deref for Crate {
     type Target = char;
@@ -14,7 +14,7 @@ impl Deref for Crate {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct Stack(Vec<Crate>);
 impl Deref for Stack {
     type Target = Vec<Crate>;
@@ -34,7 +34,6 @@ impl Stack {
     }
 }
 
-#[derive(Debug)]
 struct Ship(Vec<Stack>);
 impl Deref for Ship {
     type Target = Vec<Stack>;
@@ -91,15 +90,17 @@ fn main() {
         let to: usize = caps[3].parse().unwrap();
         let to = to - 1;
 
-        // PART 1
+        // PART 1: Move crates one at a time
         for _ in 0..amount {
             let crate_to_move = stacks_part_1[from].pop().unwrap();
             stacks_part_1[to].push(crate_to_move);
         }
 
-        // PART 2
+        // PART 2: Move crates all at once
+        // Get `amount` crates to move from the top of the `from` stack
         let stack_height = stacks_part_2[from].len();
         let mut crates_to_move = stacks_part_2[from][stack_height - amount..].to_vec();
+        // Remove the crates from the `from` stack and add them to the `to` stack
         stacks_part_2[from].truncate(stack_height - amount);
         stacks_part_2[to].append(&mut crates_to_move);
     }
@@ -111,6 +112,7 @@ fn main() {
     println!("Answer to part 2: {}", top_of_stacks_part_2);
 }
 
+/// Read the top of each stack and return a string of those crates
 fn read_top_of_stacks(stacks: &[Stack]) -> String {
     stacks
         .iter()
