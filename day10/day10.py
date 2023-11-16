@@ -9,19 +9,8 @@ def addx(arg):
   global register
   global sprite_position
   global sprite_position_str
-  print(f'adding {register} and {arg} = {register + arg}')
   register += arg
   move_sprite_pos_to(register)
-  # if arg > 0:
-  #   sprite_position = sprite_position >> arg
-  # else:
-  #   sprite_position = sprite_position << abs(arg)
-  # sprite_position_str = '{:040b}'.format(sprite_position)
-  n = len(sprite_position_str)
-  if n > 40:
-    print('chopping')
-    # sprite_position_str = sprite_position_str[n-40:]
-    sprite_position_str = '0'*40
 
 def noop(arg):
   pass
@@ -35,19 +24,19 @@ curr_cycle = 0
 buffer = None
 notable_cycles = [20, 60, 100, 140, 180, 220, 260]
 signal_strengths = []
-sprite_position = int('1'*3 + '0'*37, 2)
 current_crt_row = ''
 crt_rows = []
-sprite_position_str = '{:040b}'.format(sprite_position)
-blah = '1'*3 + '0'*37
+sprite_position_str = '1'*3 + '0'*37
 
 def move_sprite_pos_to(idx):
   global sprite_position_str
-  print('moving sprite', sprite_position_str)
   sprite_position_str = '0' * 40
   if 0 < idx < 40:
     sprite_position_str = sprite_position_str[:idx-1] + '1'*3 + sprite_position_str[idx+2:]
-  print('moved sprite', sprite_position_str)
+  elif idx == 0:
+    sprite_position_str = '1'*2 + '0'*38
+  elif idx == -1:
+    sprite_position_str = '1' + '0'*39
 
 
 
@@ -72,7 +61,7 @@ for line in lines:
     buffer[1] -= 1
     curr_cycle += 1
     check_notable_cycle(curr_cycle)
-    print(f'{register=}')
+    # print(f'{register=}')
     # thing()
     # input()
 
