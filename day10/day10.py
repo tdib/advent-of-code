@@ -1,4 +1,4 @@
-with open('/Users/dib/dev/advent-of-code-2022/day10/input.txt', 'r') as f:
+with open('input.txt', 'r') as f:
   lines = map(str.strip, f.readlines())
 
 # Function for addx instruction
