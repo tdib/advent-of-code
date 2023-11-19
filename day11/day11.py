@@ -1,6 +1,6 @@
 import copy
 
-with open('/Users/dib/dev/advent-of-code-2022/day11/test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
   lines = list(map(str.strip, f.readlines()))
 
 class Monkey:
@@ -12,9 +12,11 @@ class Monkey:
     self.true_monkey = int(true_monkey)
     self.false_monkey = int(false_monkey)
   
+  @property
   def inspect_value(self):
     return self.items[0] if self._inspect_value == 'old' else int(self._inspect_value)
 
+  # Get the monkey who I should pass to based on my current item and the divisor condition
   def get_next_recipient(self, monkeys):
     if self.items[0] % self.divisor == 0:
       recipient_monkey_idx = self.true_monkey
@@ -24,14 +26,16 @@ class Monkey:
     recipient_monkey = monkeys[recipient_monkey_idx]
     return recipient_monkey
   
+  # Remove the item from my items and give it to the recipient monkey
   def pass_item(self, recipient):
     recipient.items.append(self.items.pop(0))
 
+  # Perform the relevant worry level manipulations for my current item
   def inspect_item(self, will_get_bored, mod):
     if will_get_bored:
-      self.items[0] = (self.inspect_op(self.items[0], self.inspect_value()) // 3) % mod
+      self.items[0] = (self.inspect_op(self.items[0], self.inspect_value) // 3) % mod
     else:
-      self.items[0] = (self.inspect_op(self.items[0], self.inspect_value())) % mod
+      self.items[0] = (self.inspect_op(self.items[0], self.inspect_value)) % mod
 
 # Parse file to create list of monkey objects
 # Used to reset the question to the original state for part 1/2
