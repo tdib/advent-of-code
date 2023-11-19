@@ -1,6 +1,6 @@
 from itertools import zip_longest
 
-with open('/Users/dib/dev/advent-of-code-2022/day13/input.txt', 'r') as f:
+with open('input.txt', 'r') as f:
   lines = list(map(str.strip, f.readlines()))
 
 # Compares two elements, returning true if they are in the correct order,
