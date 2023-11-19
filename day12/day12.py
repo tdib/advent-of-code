@@ -1,87 +1,69 @@
-from collections import defaultdict
+from collections import defaultdict, deque
 
-with open('/Users/dib/dev/advent-of-code-2022/day12/input.txt', 'r') as f:
+with open('input.txt', 'r') as f:
   lines = list(map(str.strip, f.readlines()))
 
+ELEVATION_OFFSET = ord('a')
 START_LOCATION = -14
 END_LOCATION = -28
 start = None
 end = None
 
 # Map elevation to ints
+# e.g. 'a' -> 0, 'z' -> 25
 elevation_map = []
 for row_idx, row in enumerate(lines):
   curr_row = []
   for col_idx, elevation in enumerate(row):
-    elevation = ord(elevation) - ord('a')
+    elevation = ord(elevation) - ELEVATION_OFFSET
     if elevation == START_LOCATION:
       start = (row_idx, col_idx)
+      elevation = ord('a') - ELEVATION_OFFSET
     if elevation == END_LOCATION:
       end = (row_idx, col_idx)
+      elevation = ord('z') - ELEVATION_OFFSET
     curr_row.append(elevation)
   elevation_map.append(curr_row)
 
-elevation_map[start[0]][start[1]] = ord('a') - ord('a')
-elevation_map[end[0]][end[1]] = ord('z') - ord('a')
-
-  
+# Element-wise tuple addition
 def add_tuples(a, b):
   return (a[0]+b[0], a[1]+b[1])
 
+# Perform BFS from a start to end position
 def bfs(start, end):
+  directions = ((0, 1), (0, -1), (-1, 0), (1, 0))
   predecessors = defaultdict(list)
-  directions = [(0, 1), (0, -1), (-1, 0), (1, 0)]
-  direction_map = {
-    (0, -1): 'left',
-    (0, 1): 'right',
-    (-1, 0): 'up',
-    (1, 0): 'down'
-  }
-  curr = start
-  q = [curr]
-  v = []
+  q = deque([start])
+  v = set()
 
   while len(q):
-    # input()
-    # for i, row in enumerate(elevation_map):
-    #   for j, elevation in enumerate(row):
-    #     if (i, j) in v:
-    #       print('#', end='')
-    #     else:
-    #       print(lines[i][j], end='')
-    #   print()
-    # print('q', q)
-    curr = q.pop(0)
+    curr = q.popleft()
+    # We have reached the target - find the path that got us here
     if curr == end:
-      print('right before end', curr)
       return backtrack(predecessors, curr)
-    v.append(curr)
+    v.add(curr)
 
     # Find where we can move from here and add it to the queue
     for direction in directions:
-      # print(f'checking {direction_map[direction]}')
       target = add_tuples(curr, direction)
-      # print('target', target)
-      if target not in v and can_move(curr, target):
-        # print(f'can move {direction_map[direction]} ({direction}) from {curr}')
-        if target not in q:
-          q.append(target)
-          if curr not in predecessors[target]:
-            predecessors[target].append(curr)
-  print('man')
+      if target not in v and target not in q and can_move(curr, target):
+        q.append(target)
+        predecessors[target].append(curr)
+  
+  # There is no path that reaches the target
   return []
 
+# Given a list of predecessors, backtrack until we find the start node,
+# returning the path that was taken to get to the goal
 def backtrack(predecessors, target):
-  # print('pre', predecessors[(2, 5)])
-  # print()
   path = []
   while target in predecessors:
     path.append(target)
-    # print('path', path)
     target = predecessors[target][-1]
-    # print('target', target)
   return path[::-1]
 
+# Check if it is possible to move from position curr to target. This only checks
+# if the movement is possible, not if it has been visited or any other conditions
 def can_move(curr, target):
   curr_row, curr_col = curr
   target_row, target_col = target
@@ -92,28 +74,36 @@ def can_move(curr, target):
   if target_col < 0 or target_col >= len(elevation_map[0]):
     return False
   # The elevation jump is too high
-  # print(elevation_map[target_row][target_col], elevation_map[curr_row][curr_col], abs(elevation_map[target_row][target_col] - elevation_map[curr_row][curr_col]))
   if elevation_map[target_row][target_col] - elevation_map[curr_row][curr_col] > 1:
     return False
 
-  # print('e')
   return True
+
+def solve_part_1():
+  # Perform regular BFS from start to end
+  answer = len(bfs(start, end))
+  print(f'Part 1 answer: {answer}')
+
+def solve_part_2():
+  # Find all 'a' positions
+  possible_starts = []
+  for row_idx, row in enumerate(elevation_map):
+    for col_idx in range(len(row)):
+      if elevation_map[row_idx][col_idx] == 0:
+        possible_starts.append((row_idx, col_idx))
+
+  # Perform a bfs for each start position
+  possible_paths = []
+  for possible_start in possible_starts:
+    possible_paths.append(bfs(possible_start, end))
+
+  # Find the minimum path of those paths
+  answer = min(filter(lambda l: l > 0, list(map(len, possible_paths))))
+  print(f'Part 2 answer: {answer}')
   
-possible_starts = []
-for row_idx, row in enumerate(elevation_map):
-  for col_idx, elevation in enumerate(row):
-    if elevation_map[row_idx][col_idx] == 0:
-      possible_starts.append((row_idx, col_idx))
 
-possible_paths = []
-for possible_start in possible_starts:
-  print(f'Trying path from {possible_start}...')
-  possible_paths.append(bfs(possible_start, end))
-  print(f'Result: {len(possible_paths[-1])}')
-  print()
-
-print(list(map(len, possible_paths)))
-print(min(filter(lambda l: l > 0, list(map(len, possible_paths)))))
+solve_part_1()
+solve_part_2()
 
 
 
