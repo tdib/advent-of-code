@@ -1,6 +1,6 @@
 # https://adventofcode.com/2022/day/17
 
-with open('input.txt') as f:
+with open('test.txt') as f:
     line = f.readline().strip()
 
 LINE = [
@@ -78,6 +78,7 @@ def solve_part_1():
     OFFSET_FROM_LEFT = 2
     settled_rock_positions = set()
     curr_rock_positions = set()
+    max_height = -1
     num_placed = 0
     turn = 0
 
@@ -85,8 +86,7 @@ def solve_part_1():
         # We are on a turn where we need to spawn a new rock
         if not curr_rock_positions:
             # Compute 4 above the highest rock
-            spawn_height = max(settled_rock_positions, key=lambda r: r[1])[1] + HEIGHT_PADDING if len(settled_rock_positions) else HEIGHT_PADDING - 1
-            bottom_left_pos = (OFFSET_FROM_LEFT, spawn_height)
+            bottom_left_pos = (OFFSET_FROM_LEFT, max_height + HEIGHT_PADDING)
             # Compute where the new rock will spawn, anchoring on the bottom left position
             rock_idx = num_placed % len(rocks)
             for row_idx, row in enumerate(rocks[rock_idx][::-1]):
@@ -118,6 +118,8 @@ def solve_part_1():
             # We need to settle the rock where it currently is due to landing on something
             if new_pos in settled_rock_positions or new_pos[1] < 0:
                 settled_rock_positions.update(curr_rock_positions)
+                tallest_in_curr = max(curr_rock_positions, key=lambda rock: rock[1])[1]
+                max_height = max(max_height, tallest_in_curr)
                 curr_rock_positions = set()
                 num_placed += 1
                 break
