@@ -20,7 +20,7 @@ def solve_part_2():
     nums = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     for line in lines:
         # Find the digit numbers
-        matches = (re.findall(r"(?=(\d|one|two|three|four|five|six|seven|eight|nine))", line))
+        matches = re.findall(r"(?=(\d|one|two|three|four|five|six|seven|eight|nine))", line)
 
         l = matches[0]
         r = matches[-1]
