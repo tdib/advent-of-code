@@ -1,5 +1,4 @@
 # https://adventofcode.com/2023/day/1
-from collections import deque, defaultdict
 import re
 
 with open("input.txt") as f:
@@ -9,22 +8,23 @@ with open("input.txt") as f:
 def solve_part_1():
     ans = 0
     for line in lines:
-        matches = re.findall(r'\d', line)
-        ans +=  int(matches[0] + matches[-1])
-
+        matches = re.findall(r"\d", line)
+        # Check just to ensure no errors happen with inputs not containing numbers (i.e. test data)
+        if matches:
+            ans += int(matches[0] + matches[-1])
     return ans
-        
 
 
 def solve_part_2():
     ans = 0
     for line in lines:
-        nums = {
-            "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9
-        }
-        r = r'(\d)'
-        matches = (re.findall(r, line))
+        # Find the digit numbers
+        matches = (re.findall(r"\d", line))
+
+        # The if statement below is unnecessary for running the actual input, but is there
+        # to ensure the test cases work (otherwise it'll freak out)
         if matches:
+            # If we have at least one match, we are safe to set both left and right
             num_num_left = matches[0]
             num_num_right = matches[-1]
             num_idx_left = line.index(num_num_left)
@@ -32,43 +32,42 @@ def solve_part_2():
         else:
             num_num_left = None
             num_num_right = None
-        
+
+        # Find the string numbers
+        nums = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+        # These idx variables are used to track the *position* of a given digit string
         str_idx_left = len(line) - 1
-        str_num_left = None
         str_idx_right = 0
+        # We will use the num variables to track the *value* of a given digit string
+        str_num_left = None
         str_num_right = None
-        for num, val in nums.items():
-            if num in line:
-                if (idx := line.index(num)) < str_idx_left:
-                    str_idx_left = idx
+        for val, num_str in enumerate(nums):
+            # Offset by 1 to allow the index value to match the string we are dealing with
+            val += 1
+            if num_str in line:
+                # We have a new leftmost string index
+                if (l_idx := line.index(num_str)) < str_idx_left:
+                    str_idx_left = l_idx
                     str_num_left = val
-            
-                if (idx := line.rindex(num)) > str_idx_right:
-                    str_idx_right = idx
+                # We have a new rightmost string index
+                if (r_idx := line.rindex(num_str)) > str_idx_right:
+                    str_idx_right = r_idx
                     str_num_right = val
+        
+        # By this point, we will have the leftmost and rightmost strings and digits
 
-        # We have both strs and nums
-        x, y = len(line), 0
-        if str_num_left and str_num_left:
-            if str_idx_left < num_idx_left:
-                x = str_num_left
-            else:
-                x = num_num_left
+        l, r = len(line), 0
+        # We have strings
+        if str_num_left:
+            # We perform comparisons with the strings and digits to find the bounds
+            l = str_num_left if str_idx_left < num_idx_left else num_num_left
+            r = str_num_right if str_idx_right > num_idx_right else num_num_right
+        # We only have numbers
+        else:
+            l = num_num_left
+            r = num_num_right
 
-            if str_idx_right > num_idx_right:
-                y = str_num_right
-            else:
-                y = num_num_right
-        # We have no numbers
-        elif str_num_left and not num_num_left:
-            x = num_num_left
-            y = num_num_right
-        # We have no strs
-        elif not str_num_left and num_num_left:
-            x = num_num_left
-            y = num_num_right
-
-        ans += int(f"{x}{y}")
+        ans += int(f"{l}{r}")
 
     return ans
         
