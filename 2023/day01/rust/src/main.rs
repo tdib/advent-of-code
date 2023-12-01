@@ -42,14 +42,12 @@ fn solve_part_2(input: &str) -> usize {
 
         let mut l_num_val: Option<usize> = None;
         let mut r_num_val: Option<usize> = None;
-        if !caps.is_empty() {
-            if let Some(first_cap) = caps.first() {
-                l_num_val = first_cap[0].parse::<usize>().ok();
-            }
+        if let Some(first_cap) = caps.first() {
+            l_num_val = first_cap[0].parse::<usize>().ok();
+        }
 
-            if let Some(last_cap) = caps.last() {
-                r_num_val = last_cap[0].parse::<usize>().ok();
-            }
+        if let Some(last_cap) = caps.last() {
+            r_num_val = last_cap[0].parse::<usize>().ok();
         }
 
         let l_num_idx = if let Some(val) = l_num_val {
@@ -58,7 +56,7 @@ fn solve_part_2(input: &str) -> usize {
             None
         };
         let r_num_idx = if let Some(val) = r_num_val {
-            line.find(&val.to_string())
+            line.rfind(&val.to_string())
         } else {
             None
         };
@@ -121,12 +119,6 @@ fn solve_part_2(input: &str) -> usize {
             (None, None) => unreachable!(),
         }
 
-        println!("{line}");
-        println!("Nums: {l_num_val:?} ({l_num_idx:?}), {r_num_val:?} ({r_num_idx:?})");
-        println!("Strs: {l_str_val:?} ({l_str_idx:?}), {r_str_val:?} ({r_str_idx:?})");
-        println!("Selected: {l_num:?} {r_num:?}");
-        println!();
-        //
         ans += format!("{l_num}{r_num}").parse::<usize>().unwrap();
     }
 
