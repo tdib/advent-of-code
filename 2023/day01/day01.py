@@ -21,17 +21,13 @@ def solve_part_2():
         # Find the digit numbers
         matches = (re.findall(r"\d", line))
 
-        # The if statement below is unnecessary for running the actual input, but is there
-        # to ensure the test cases work (otherwise it'll freak out)
+        # Check just to ensure no errors happen with inputs not containing numbers (i.e. test data)
         if matches:
             # If we have at least one match, we are safe to set both left and right
             num_num_left = matches[0]
             num_num_right = matches[-1]
             num_idx_left = line.index(num_num_left)
             num_idx_right = line.rindex(num_num_right)
-        else:
-            num_num_left = None
-            num_num_right = None
 
         # Find the string numbers
         nums = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
