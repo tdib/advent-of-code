@@ -40,48 +40,31 @@ fn solve_part_2(input: &str) -> usize {
     for line in input.lines() {
         let caps: Vec<_> = re.captures_iter(line).collect();
 
-        let mut l_num_val: Option<usize> = None;
-        let mut r_num_val: Option<usize> = None;
-        if let Some(first_cap) = caps.first() {
-            l_num_val = first_cap[0].parse::<usize>().ok();
-        }
+        let l_num_val: Option<usize> = caps.first().map(|first| first[0].parse().unwrap());
+        let r_num_val: Option<usize> = caps.last().map(|last| last[0].parse().unwrap());
 
-        if let Some(last_cap) = caps.last() {
-            r_num_val = last_cap[0].parse::<usize>().ok();
-        }
+        let l_num_idx = l_num_val.and_then(|val| line.find(&val.to_string()));
+        let r_num_idx = r_num_val.and_then(|val| line.rfind(&val.to_string()));
 
-        let l_num_idx = if let Some(val) = l_num_val {
-            line.find(&val.to_string())
-        } else {
-            None
-        };
-        let r_num_idx = if let Some(val) = r_num_val {
-            line.rfind(&val.to_string())
-        } else {
-            None
-        };
-
-        let nums = vec![
+        let nums = [
             "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
         ];
         let mut l_str_idx = None;
         let mut l_str_val = None;
         let mut r_str_idx = None;
         let mut r_str_val = None;
-        for (char_idx, num_str) in nums.iter().enumerate() {
-            if line.contains(num_str) {
-                if let Some(find_idx) = line.find(num_str) {
-                    if l_str_idx.is_none() || find_idx < l_str_idx.unwrap() {
-                        l_str_idx = Some(find_idx);
-                        l_str_val = Some(char_idx + 1);
-                    }
+        for (char_idx, digit_str) in nums.into_iter().enumerate() {
+            if let Some(find_idx) = line.find(digit_str) {
+                if l_str_idx.is_none() || find_idx < l_str_idx.unwrap() {
+                    l_str_idx = Some(find_idx);
+                    l_str_val = Some(char_idx + 1);
                 }
+            }
 
-                if let Some(find_idx) = line.rfind(num_str) {
-                    if r_str_idx.is_none() || find_idx > r_str_idx.unwrap() {
-                        r_str_idx = Some(find_idx);
-                        r_str_val = Some(char_idx + 1);
-                    }
+            if let Some(find_idx) = line.rfind(digit_str) {
+                if r_str_idx.is_none() || find_idx > r_str_idx.unwrap() {
+                    r_str_idx = Some(find_idx);
+                    r_str_val = Some(char_idx + 1);
                 }
             }
         }
@@ -97,7 +80,7 @@ fn solve_part_2(input: &str) -> usize {
                     l_num_val.unwrap()
                 };
 
-                r_num = if r_str_idx.unwrap() > r_num_idx.unwrap() {
+                r_num = if r_str_idx > r_num_idx {
                     r_str_val.unwrap()
                 } else {
                     r_num_val.unwrap()
