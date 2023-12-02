@@ -1,7 +1,7 @@
 use std::fs::read_to_string;
 
 fn main() {
-    let input: String = read_to_string("../../input.txt").expect("Input file not found");
+    let input: String = read_to_string("../../test.txt").expect("Input file not found");
 
     println!("Part 1 answer: {}", solve_part_1(&input));
     println!("Part 2 answer: {}", solve_part_2(&input));
@@ -15,7 +15,7 @@ struct Game {
     highest_blue: usize,
 }
 
-#[derive(Debug, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Copy)]
 enum Colour {
     Red,
     Green,
@@ -34,14 +34,12 @@ impl Colour {
 }
 
 fn get_max_colour_counts(line: &str) -> Game {
-    let mut red = 0;
-    let mut green = 0;
-    let mut blue = 0;
-
     // ["Game 1", "3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"]
-    let game_split = line.split(": ").collect::<Vec<_>>();
+    let mut game_split = line.split(": ");
     // "Game 1" -> 1
-    let game_id: usize = game_split[0]
+    let game_id: usize = game_split
+        .next()
+        .unwrap()
         .split(' ')
         .next_back()
         .unwrap()
@@ -49,12 +47,14 @@ fn get_max_colour_counts(line: &str) -> Game {
         .unwrap();
 
     // ["3 blue, 4 red", "1 red, 2 green", "6 blue, 2 green"]
-    let game_sets = game_split[1].split(';').collect::<Vec<_>>();
+    let game_sets = game_split.next().unwrap().split(';').collect::<Vec<_>>();
 
-    // ["3 blue", "4 red"], ["1 red", "2 green"], etc.
-    let game_sets = game_sets.iter().map(|set| set.trim().split(", "));
-    for set in game_sets {
-        for item in set {
+    let [red, green, blue] = game_sets
+        .iter()
+        // Splitting on ", " gives ["3 blue", "4 red"], ["1 red", "2 green"], ...
+        // Flattening gives ["3 blue", "4 red", "1 red", "2 green", ...]
+        .flat_map(|set| set.trim().split(", "))
+        .fold([0, 0, 0], |mut counts, item| {
             // Parse the colour and amount
             // amount -> 3
             // colour -> Colour::Blue
@@ -62,14 +62,10 @@ fn get_max_colour_counts(line: &str) -> Game {
             let amount = parts.next().unwrap().parse::<usize>().unwrap();
             let colour = Colour::from_str(parts.next().unwrap());
 
-            // Check if this colour amount is higher than our currently stored one
-            match colour {
-                Colour::Red => red = red.max(amount),
-                Colour::Green => green = green.max(amount),
-                Colour::Blue => blue = blue.max(amount),
-            }
-        }
-    }
+            // Check if we have a higher amount of this colour
+            counts[colour as usize] = counts[colour as usize].max(amount);
+            counts
+        });
 
     Game {
         game_id,
