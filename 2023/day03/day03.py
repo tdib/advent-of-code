@@ -96,6 +96,7 @@ def solve_part_1():
     symbols = symbol_coverage_positions.copy()
     symbol_coverage_positions = symbol_coverage_positions.union(new_symbols)
 
+
     adj = {}
     # Go through every number
     for curr_num_positions, val in position_num_map.items():
@@ -141,9 +142,116 @@ def solve_part_1():
 
 
 def solve_part_2():
-    ans = 0
-    for line in lines:
-        pass
+    symbol_coverage_positions = set()
+    new_symbols = set()
+    directions = [(0, 1), (0, -1), (-1, 0), (1, 0), (1, 1), (-1, 1), (-1, -1), (1, -1)]
+    r = r'(\d+)'
+    # Map positions to numbers
+    position_num_map = {}
+    for row_idx, line in enumerate(lines):
+        matches = re.finditer(r, line)
+        for match in matches:
+            filled = fill((row_idx, match.start()), (row_idx, match.end()-1))
+            match = match.group(0)
+            position_num_map[filled] = int(match)
+
+    for row_idx, line in enumerate(lines):
+        # Find symbols
+        for col_idx, symbol_coverage_pos in enumerate(line):
+            if symbol_coverage_pos != "." and not symbol_coverage_pos.isdigit():
+                symbol_coverage_positions.add((row_idx, col_idx))
+            
+    # Expand symbol radii
+    for pos in symbol_coverage_positions:
+        for dir in directions:
+            new_symbols.add(add_tuples(pos, dir))
+    symbols = symbol_coverage_positions.copy()
+    symbol_coverage_positions = symbol_coverage_positions.union(new_symbols)
+
+
+    # for line in lines:
+        # print(line)
+    ans = 0 
+    for symbol in symbols:
+        touching = []
+        radius_positions = set([symbol])
+        # If we find a gear
+        if lines[symbol[0]][symbol[1]] != "*":
+            continue
+        print()
+        print("NOW LOOKING AT SYMBOL", symbol)
+        
+        # Expand its radius
+        for dir in directions:
+            radius_positions.add(add_tuples(symbol, dir))
+
+        
+        # Number of women i've touched
+        num_touches = 0
+        touches = {}
+        # Take each position in the radius
+        for r in radius_positions:
+            # Check if there is a number that exists in that radius
+            for curr_num_positions, val in position_num_map.items():
+                found_touch = False
+                if r in curr_num_positions:
+                # for pos in curr_num_positions:
+                    # if pos in radius_positions:
+                    touches[curr_num_positions] = val
+                    touching.append(val)
+                    num_touches += 1
+                    found_touch = True
+                    break
+                
+        
+        print(symbol, num_touches)
+        touches = { k:v for k, v in touches.items() if len(touches) >= 2}
+        touches_thing = touches.values()
+        print(touches)
+        if touches_thing:
+            product = 1
+            for t in touches_thing:
+                product *= t
+            print(product)
+            ans += product
+                # If we have found one from the previous loop
+                # 
+                # if found_touch:
+                    
+            
+        # if symbol == "*":
+
+    adj = {}
+    # Go through every number
+    for curr_num_positions, val in position_num_map.items():
+        # Go through every place that a symbol covers
+        for symbol_coverage_pos in symbol_coverage_positions:
+            # If we have an intersection, we can say this value is adjacent
+            if symbol_coverage_pos in curr_num_positions:
+                # if val == 239:
+                #     print(symbol_coverage_pos, curr_num_positions, symbol_coverage_pos in curr_num_positions, val)
+                #     pass
+                # adj[symbol_coverage_pos] = val
+                adj[curr_num_positions] = val
+                break
+    # print(adj)
+
+    flat_num_positions = [item for sublist in position_num_map.keys() for item in sublist]
+    # print_map(lines, flat_num_positions, symbols, symbol_coverage_positions)
+
+    non_adj = []
+    for element in position_num_map.values():
+        if element not in adj.values():
+            non_adj.append(element)
+
+    adj = adj.values()
+    print(adj)
+
+    # print({ k:v for k, v in adj.items() if v == 889})
+    # print(list(filter(lambda x: x == 889, adj)))
+
+    # 72553360 too high
+    return ans
 
 
 print(f"Part 1 answer: {solve_part_1()}")
