@@ -35,29 +35,18 @@ def solve_part_1():
 
 def solve_part_2():
     ans = 0
-    m = defaultdict(lambda: int(0))
+    m = defaultdict(lambda: 1)
     for line in lines:
         card_id, num_winning_nums = parse(line)
 
-        # Keep track of the next n cards (that we must duplicate)
+        # Each of the next n elements should have as many copies
+        # as we do of the current element - e.g. if we have 3 copies
+        # of the current card, the next element will end up being copied 3 times
         for i in range(card_id+1, card_id+num_winning_nums+1):
-            m[i] += 1
-
-        # For every duplicate
-        while m[card_id]:
-            # Calculate the next duplicates from the curent win
-            for i in range(card_id+1, card_id+num_winning_nums+1):
-                m[i] += 1
-            
-            # Decrement because we just handled one instance of this dupe
-            m[card_id] -= 1
-            
-            # Count the current duplicate
-            ans += 1
+            m[i] += m[card_id]
         
-        # Count the current card (does not matter whether it wins or not)
-        ans += 1
-
+        ans += m[card_id]
+        
     return ans
 
 print(f"Part 1 answer: {solve_part_1()}")
