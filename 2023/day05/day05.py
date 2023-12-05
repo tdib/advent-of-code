@@ -152,8 +152,8 @@ def solve_part_1():
     all_things = []
     for seed in seeds:
         out = seed
-        print()
-        print("SEED", seed)
+        # print()
+        # print("SEED", seed)
         # flag = False
         for i, m in enumerate(maps):
             # print("map", i)
@@ -165,9 +165,9 @@ def solve_part_1():
             # print(out)
                     # print(out)
         # break
-        print(out)
+        # print(out)
         all_things.append(out)
-    print(all_things)
+    # print(all_things)
     return min(all_things)
                 # print(dest_range_start, source_range_start, range_len)
             # print()
@@ -182,13 +182,276 @@ def solve_part_1():
         # dest_range = range(dest_range_start, dest_range_start+range_len)
 
 
+# def solve_part_2():
+#     ans = 0
+#     seeds = []
+#     seed_to_soil = []
+#     soil_to_fertilizer = []
+#     fertilizer_to_water = []
+#     water_to_light = []
+#     light_to_temperature = []
+#     temperature_to_humidity = []
+#     humidity_to_location = []
+#     maps = [seed_to_soil, soil_to_fertilizer, fertilizer_to_water,
+#             water_to_light, light_to_temperature, temperature_to_humidity, 
+#             humidity_to_location]
+#     num_blanks = 0
+
+#     r = r"(\d+)"
+#     seeds = list(map(int, re.findall(r, lines[0])))
+
+#     seed_ranges = []
+
+#     # Get seed ranges from seeds line
+#     for i in range(0, len(seeds), 2):
+#         # seed_ranges.append(range(seeds[i], seeds[i] + seeds[i+1]))
+#         seed_ranges.append((seeds[i], seeds[i] + seeds[i+1]))
+
+#     print(seed_ranges)
+#     print()
+
+#     for line in lines[2:]:
+#         if line == "":
+#             num_blanks += 1
+#             continue
+#         if ":" in line:
+#             continue
+#         target_map = maps[num_blanks]
+#         target_map.append(list(map(int, re.findall(r, line))))
+    
+#     j = 0
+#     for i, m in enumerate(maps):
+#         print()
+#         print()
+#         print("map", i, "with seed ranges", seed_ranges)
+#         j += 1
+#     # for seed_range in seed_ranges:
+#         # max of starts
+#         # min of ends
+#         # At every stage we map our current seed ranges into the next
+#         temp_seed_ranges = []
+#         while len(seed_ranges):
+#             seed_start, seed_end = seed_ranges.pop()
+#             # if seed_start == 0 or seed_end == 0:
+#             #     print("ZERO", (seed_start, seed_end))
+#             print("SEED RANGE ->", seed_start, seed_end)
+#             for dest_range_start, source_range_start, range_len in m:
+#                 print("checking:", dest_range_start, source_range_start, range_len, (source_range_start, source_range_start+range_len))
+#                 """
+#                           ============   source
+#                 --------                 seeds
+
+#                 ~~~~~~~~~             dest
+#                        ============   source
+#                 --------------        seeds
+
+#                        ========     source
+#                 ------------------  seeds
+#                 """
+#                 overlap_start = max(seed_start, source_range_start)
+#                 overlap_end = min(seed_end, source_range_start + range_len)
+#                 # print(f"source range {(source_range_start, source_range_start + range_len)}")
+#                 # print(f"dest range {(dest_range_start, dest_range_start + range_len)}")
+
+#                 # print("BLAH", dest_range_start, source_range_start, range_len)
+#                 # We have a valid overlap
+#                 # means we have a left and right of overlap - could be length 0
+#                 if overlap_start < overlap_end:
+#                     # Left of overlap
+#                     # (54, 100)
+#                     if overlap_start > seed_start: # we have a left range
+#                         print("    left", (seed_start, overlap_start))
+#                         # temp_seed_ranges.append((source_range_start, overlap_start))
+#                         temp_seed_ranges.append((seed_start, overlap_start))
+#                     else:
+#                         print("    no left")
+#                     # overlap means we are in the current item range so we compute
+#                     # the offset ranges
+#                     res = (overlap_start - (source_range_start - dest_range_start), overlap_end - (source_range_start - dest_range_start))
+#                     # if res[0] == 0:
+#                     print("    overlap", (overlap_start, overlap_end), "maps to", res)
+#                     # if overlap_start == 0:
+#                         # print("    mapping", (overlap_start, overlap_end), "to", res)
+#                     temp_seed_ranges.append(
+#                         (overlap_start - (source_range_start - dest_range_start), overlap_end - (source_range_start - dest_range_start))
+#                     )
+
+#                     # if overlap_end < source_range_start + range_len:
+#                     if overlap_end < seed_end:
+#                         # temp_seed_ranges.append((overlap_end, source_range_start + range_len)) # calculate right
+#                         print("    right", (overlap_end, seed_end))
+#                         temp_seed_ranges.append((overlap_end, seed_end)) # calculate right
+#                     else:
+#                         print("    no right")
+#                     # print()
+#                     break #TODO
+#                 # else:
+#                 #     print("    ---")
+#                 #     print()
+#             # no overlap in any of the ranges within this map - pass our values through
+#             else:
+#                 print('    no overlap', (seed_start, seed_end))
+#                 # print()
+#                 temp_seed_ranges.append((seed_start, seed_end))
+#             # print()
+
+#         # Once we have built the new seed ranges (by exhausing our current seeds)
+#         # we can assign it back and repeat
+#         seed_ranges = temp_seed_ranges
+#         x = list(filter(lambda y: y[0] == 0 or y[1] == 0, seed_ranges))
+#         # print("seed ranges:::::::: ", seed_ranges)
+#         print("seeds with 0", x)
+#         # print()
+#         # if j == 2:
+#         #     break
+#                     #right of overlap
+#     # print(len(seed_ranges), f"{(27)}")
+#     # print(len(seed_ranges), "(27)")
+#     seed_ranges.sort()
+#     # print(seed_ranges[:10])
+#     print()
+#     # > 92743746
+#     print(seed_ranges)
+#     return seed_ranges[0][0]
+#     # print(seed_ranges)
+
+    
 def solve_part_2():
     ans = 0
-    for line in lines:
-        pass
-    return ans
+    seeds = []
+    seed_to_soil = []
+    soil_to_fertilizer = []
+    fertilizer_to_water = []
+    water_to_light = []
+    light_to_temperature = []
+    temperature_to_humidity = []
+    humidity_to_location = []
+    maps = [seed_to_soil, soil_to_fertilizer, fertilizer_to_water,
+            water_to_light, light_to_temperature, temperature_to_humidity, 
+            humidity_to_location]
+    num_blanks = 0
 
+    r = r"(\d+)"
+    seeds = list(map(int, re.findall(r, lines[0])))
+
+    seed_ranges = []
+
+    # Get seed ranges from seeds line
+    for i in range(0, len(seeds), 2):
+        # seed_ranges.append(range(seeds[i], seeds[i] + seeds[i+1]))
+        seed_ranges.append((seeds[i], seeds[i] + seeds[i+1]))
+
+    print(seed_ranges)
+    print()
+
+    for line in lines[2:]:
+        if line == "":
+            num_blanks += 1
+            continue
+        if ":" in line:
+            continue
+        target_map = maps[num_blanks]
+        target_map.append(list(map(int, re.findall(r, line))))
+    
+    for m in maps:
+        print(m)
+    
+    j = 0
+    for i, m in enumerate(maps):
+        print()
+        print()
+        print("map", i, "with seed ranges", seed_ranges)
+        j += 1
+    # for seed_range in seed_ranges:
+        # max of starts
+        # min of ends
+        # At every stage we map our current seed ranges into the next
+        temp_seed_ranges = []
+        while len(seed_ranges):
+            seed_start, seed_end = seed_ranges.pop()
+            # if seed_start == 0 or seed_end == 0:
+            #     print("ZERO", (seed_start, seed_end))
+            print("SEED RANGE ->", seed_start, seed_end)
+            for dest_range_start, source_range_start, range_len in m:
+                print("checking:", dest_range_start, source_range_start, range_len, (source_range_start, source_range_start+range_len))
+                """
+                          ============   source
+                --------                 seeds
+
+                ~~~~~~~~~             dest
+                       ============   source
+                --------------        seeds
+
+                       ========     source
+                ------------------  seeds
+                """
+                overlap_start = max(seed_start, source_range_start)
+                overlap_end = min(seed_end, source_range_start + range_len)
+                # print(f"source range {(source_range_start, source_range_start + range_len)}")
+                # print(f"dest range {(dest_range_start, dest_range_start + range_len)}")
+
+                # print("BLAH", dest_range_start, source_range_start, range_len)
+                # We have a valid overlap
+                # means we have a left and right of overlap - could be length 0
+                if overlap_start < overlap_end:
+                    # Left of overlap
+                    # (54, 100)
+                    if overlap_start > seed_start: # we have a left range
+                        print("    left", (seed_start, overlap_start))
+                        # temp_seed_ranges.append((source_range_start, overlap_start))
+                        seed_ranges.append((seed_start, overlap_start))
+                    else:
+                        print("    no left")
+                    # overlap means we are in the current item range so we compute
+                    # the offset ranges
+                    # res = (overlap_start - (source_range_start - dest_range_start), overlap_end - (source_range_start - dest_range_start))
+                    res = (overlap_start - (source_range_start - dest_range_start), overlap_end - (source_range_start - dest_range_start))
+                    # if res[0] == 0:
+                    print("    overlap", (overlap_start, overlap_end), "maps to", res)
+                    # if overlap_start == 0:
+                        # print("    mapping", (overlap_start, overlap_end), "to", res)
+                    temp_seed_ranges.append(res)
+
+                    # if overlap_end < source_range_start + range_len:
+                    if overlap_end < seed_end:
+                        # temp_seed_ranges.append((overlap_end, source_range_start + range_len)) # calculate right
+                        print("    right", (overlap_end, seed_end))
+                        seed_ranges.append((overlap_end, seed_end)) # calculate right
+                    else:
+                        print("    no right")
+                    # print()
+                    break #TODO
+                # else:
+                #     print("    ---")
+                #     print()
+            # no overlap in any of the ranges within this map - pass our values through
+            else:
+                print('    no overlap', (seed_start, seed_end))
+                # print()
+                temp_seed_ranges.append((seed_start, seed_end))
+            # print()
+
+        # Once we have built the new seed ranges (by exhausing our current seeds)
+        # we can assign it back and repeat
+        seed_ranges = temp_seed_ranges
+        x = list(filter(lambda y: y[0] == 0 or y[1] == 0, seed_ranges))
+        # print("seed ranges:::::::: ", seed_ranges)
+        print("seeds with 0", x)
+        # print()
+        # if j == 2:
+        #     break
+                    #right of overlap
+    # print(len(seed_ranges), f"{(27)}")
+    # print(len(seed_ranges), "(27)")
+    seed_ranges.sort()
+    # print(seed_ranges[:10])
+    print()
+    print(seed_ranges)
+    return seed_ranges[0][0]
+    # print(seed_ranges)
 
 print(f"Part 1 answer: {solve_part_1()}")
+# > 92743746
+# > 23652296
 print(f"Part 2 answer: {solve_part_2()}")
 
