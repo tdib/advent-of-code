@@ -1,17 +1,19 @@
-f = open('input.txt', 'r')
-lines = f.readlines()
+with open("input.txt") as f:
+  lines = list(map(str.strip, f.readlines()))
 
 all_sums = []
 subtotal = 0
 for line in lines:
-  if line == '\n':
-    all_sums.append(subtotal)
-    subtotal = 0
-  else:
-    subtotal += int(line)
+    if not line:
+        all_sums.append(subtotal)
+        subtotal = 0
+    else:
+        subtotal += int(line)
+# We will not encounter a newline at the end of the file so we must add the last number
+# This is not necessary but here for completeness
+all_sums.append(subtotal)
 
-n = 3
-answer = sum(sorted(all_sums)[-n:])
-print(answer)
-
-f.close()
+N = [1, 3]
+a, b = [sum(sorted(all_sums)[-n:]) for n in N]
+print(f"Part 1 answer: {a}")
+print(f"Part 2 answer: {b}")
