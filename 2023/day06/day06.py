@@ -11,17 +11,15 @@ def solve_part_1():
     r = r"(\d+)"
     times = list(map(int, re.findall(r, lines[0])))
     dists = list(map(int, re.findall(r, lines[1])))
-    for time, dist_to_beat in zip(times, dists):
-        blah = []
-        time_left = time
+    for time_left, dist_to_beat in zip(times, dists):
+        winning_dists = []
         curr_dist_per_ms = 0
         while time_left > 0:
             curr_dist_per_ms += 1
             time_left -= 1
-            end_dist = time_left * curr_dist_per_ms
-            if end_dist > dist_to_beat:
-                blah.append(end_dist)
-        ans *= len(blah)
+            if (end_dist := time_left * curr_dist_per_ms) > dist_to_beat:
+                winning_dists.append(end_dist)
+        ans *= len(winning_dists)
 
     return ans
 
@@ -29,20 +27,16 @@ def solve_part_1():
 def solve_part_2():
     ans = 1
     r = r"(\d+)"
-    times = re.findall(r, lines[0])
-    dists = re.findall(r, lines[1])
-    time = int(''.join(times))
-    dist = int(''.join(dists))
-    blah = []
-    time_left = time
+    time_left = int(''.join(re.findall(r, lines[0])))
+    dist_to_beat = int(''.join(re.findall(r, lines[1])))
+    winning_dists = []
     curr_dist_per_ms = 0
     while time_left > 0:
         curr_dist_per_ms += 1
         time_left -= 1
-        end_dist = time_left * curr_dist_per_ms
-        if end_dist > dist:
-            blah.append(end_dist)
-    ans *= len(blah)
+        if (end_dist := time_left * curr_dist_per_ms) > dist_to_beat:
+            winning_dists.append(end_dist)
+    ans *= len(winning_dists)
 
     return ans
 
