@@ -51,7 +51,7 @@ def solve_part_2():
     # Find the starting nodes
     curr_nodes = [node for node in nodes if node.endswith("A")]
 
-    visited = defaultdict(list)
+    # visited = defaultdict(list)
     cycles = {}
 
     # Find how long each node takes to go from a possible end node back to another possible end node
@@ -62,21 +62,15 @@ def solve_part_2():
         looking = curr_nodes[curr_node_idx]
         # We go until we find a cycle for this node
         while not found_cycle:
-            for char_idx, dir in enumerate(dirs):
+            for dir in dirs:
                 num_steps += 1
                 # Where do we move to? Left or right?
                 curr = nodes[curr_nodes[curr_node_idx]][DIRECTION_MAP[dir]]
                 curr_nodes[curr_node_idx] = curr
-                # If we have not seen this combination of node and character index before
-                # then we must add it to a dict to keep set of it
-                if (curr, char_idx) not in visited[looking]:
-                    visited[looking].append((curr, char_idx))
-                # If we reach here, then we have already seen this combination in our visited.
-                # We can then check if it is a goal node (by checking if it ends in Z), and if so,
-                # compute how long it took to travel from the previous instance of this node back here
-                # and break the loop
-                elif curr.endswith("Z"):
-                    cycles[looking] = num_steps - visited[looking].index((curr, char_idx)) - 1
+                # If we come across an end node, stop the search
+                # No idea why this works, but it's faster than my prev solution :) thanks Stefan
+                if curr.endswith("Z"):
+                    cycles[curr] = num_steps
                     found_cycle = True
                     break
 
