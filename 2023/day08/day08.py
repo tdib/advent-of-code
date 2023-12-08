@@ -68,6 +68,7 @@ def solve_part_2():
                 curr_nodes[curr_node_idx] = curr
                 # If we come across an end node, stop the search
                 # No idea why this works, but it's faster than my prev solution :) thanks Stefan
+                # Edit: turns out the solution is designed so start -> z has the same length as z -> z
                 if curr.endswith("Z"):
                     cycles[curr] = num_steps
                     found_cycle = True
