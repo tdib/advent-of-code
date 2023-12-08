@@ -59,7 +59,6 @@ def solve_part_2():
     for curr_node_idx in range(len(curr_nodes)):
         found_cycle = False
         num_steps = 0
-        looking = curr_nodes[curr_node_idx]
         # We go until we find a cycle for this node
         while not found_cycle:
             for dir in dirs:
