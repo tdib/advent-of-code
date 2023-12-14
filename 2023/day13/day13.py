@@ -1,55 +1,19 @@
 with open("input.txt") as f:
-    lines = f.read()
+    lines = list(map(lambda x: x.splitlines(), f.read().split("\n\n")))
 
-grids = list(map(lambda x: x.split("\n"), lines.split("\n\n")))
+def find_mirror(g, is_part_2=False):
+    for i in range(1, len(g)):
+        top = g[:i][::-1]
+        bot = g[i:]
 
-def solve_part_1():
-    ans = 0
-    for g in grids:
-        found = False
-        vert_mirror = True
-        # Rows
-        for i, (r1, r2) in enumerate(zip(g, g[1:])):
-            mirror_size = min(len(g[:i]), len(g[i+2:]))
-            top = g[:i]
-            bot = g[i+2:]
-            if len(top) > len(bot):
-                top = list(reversed(list(reversed(top))[:mirror_size]))
-            elif len(bot) > len(top):
-                bot = bot[:mirror_size]
+        # Truncate longer array
+        top = top[:len(bot)]
+        bot = bot[:len(top)]
 
-            if r1 == r2 and top == list(reversed(bot)):
-                ans += 100 * (i + 1)
-                found = True
-                vert_mirror = False
-                break
-        
-        if vert_mirror == False:
-            continue
+        if (not is_part_2 and top == bot) or (is_part_2 and count_diff(top, bot) == 1):
+            return i
 
-        g = list(zip(*g))
-        for i, f in enumerate(g):
-            g[i] = ''.join(f)
-
-        # Cols
-        for i, (c1, c2) in enumerate(list(zip(g, g[1:]))):
-            mirror_size = min(len(g[:i]), len(g[i+2:]))
-            top = g[:i]
-            bot = g[i+2:]
-            if len(top) > len(bot):
-                top = list(reversed(list(reversed(top))[:mirror_size]))
-            elif len(bot) > len(top):
-                bot = bot[:mirror_size]
-
-            if c1 == c2 and top == list(reversed(bot)):
-                found = True
-                ans += i + 1
-                break
-        
-        if not found:
-            raise RuntimeError("Mirror not found")
-        
-    return ans
+    return 0
 
 def count_diff(a, b):
     diff = 0
@@ -58,70 +22,30 @@ def count_diff(a, b):
             if i != j: diff += 1
     return diff
 
-def solve_part_2():
+def solve_part_1():
     ans = 0
-    for g in grids:
-        found = False
-        vert_mirror = True
-        print("\n".join(g))
-        # Rows
-        print("rows")
-        for i, (c1, c2) in enumerate(zip(g, g[1:])):
-            mirror_size = min(len(g[:i]), len(g[i+2:]))
-            top = g[:i]
-            bot = g[i+2:]
-            if len(top) > len(bot):
-                top = list(reversed(list(reversed(top))[:mirror_size]))
-            elif len(bot) > len(top):
-                bot = bot[:mirror_size]
-            
-            row_diff = count_diff(c1, c2)
-
-            if (c1 == c2 and count_diff(top, list(reversed(bot))) == 1) or (row_diff == 1 and count_diff(top, list(reversed(bot))) == 0):
-                print("FOUND ROW", i+1)
-                ans += 100 * (i + 1)
-                found = True
-                vert_mirror = False
-                break
-        print("rows complete")
-        
-        if vert_mirror == False:
-            print("EARLY RETURN")
-            print()
+    for g in lines:
+        # Check rows
+        if res := find_mirror(g):
+            ans += 100 * res
             continue
         
-        print()
-        g = list(zip(*g))
-        for i, f in enumerate(g):
-            g[i] = ''.join(f)
+        # Check cols (by transposing grid)
+        ans += find_mirror(list(zip(*g)))
 
-        print("cols")
-
-        # Cols
-        for i, (c1, c2) in enumerate(list(zip(g, g[1:]))):
-            mirror_size = min(len(g[:i]), len(g[i+2:]))
-            top = g[:i]
-            bot = g[i+2:]
-            if len(top) > len(bot):
-                top = list(reversed(list(reversed(top))[:mirror_size]))
-            elif len(bot) > len(top):
-                bot = bot[:mirror_size]
-
-            row_diff = count_diff(c1, c2)
-
-            if (c1 == c2 and count_diff(top, list(reversed(bot))) == 1) or (row_diff == 1 and count_diff(top, list(reversed(bot))) == 0):
-                print("FOUND COL", i+1)
-                found = True
-                ans += i + 1
-                break
-        
-        if not found:
-            raise RuntimeError("Mirror not found")
-        
     return ans
 
+def solve_part_2():
+    ans = 0
+    for g in lines:
+        # Check rows
+        if res := find_mirror(g, is_part_2=True):
+            ans += 100 * res
+        
+        # Check cols (by transposing grid)
+        ans += find_mirror(list(zip(*g)), is_part_2=True)
 
-# > 18765
-# > 17765
-print(f"Part 1 answer: {solve_part_1()}")
+    return ans
+
+print(f"Part 1 answer: {solve_part_1()}, (36448)")
 print(f"Part 2 answer: {solve_part_2()}")
