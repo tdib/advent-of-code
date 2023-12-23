@@ -1,200 +1,120 @@
 # https://adventofcode.com/2023/day/23
-from collections import deque, defaultdict
-import re
+from collections import deque
 
 with open("input.txt") as f:
     lines = list(map(str.strip, f.readlines()))
 
-
 def add_tuples(a, b):
     return (a[0] + b[0], a[1] + b[1])
 
-def within_bounds(pos):
-    row, col = pos
-    return row >= 0 and row < len(lines) and col >= 0 and col < len(lines[0])
-
-def print_map(v):
-    for r, row in enumerate(lines):
-        for c, ch in enumerate(row):
-            curr = (r, c)
-            if curr in v:
-                print("O", end="")
-            else:
-                print(ch, end="")
-        print()
-    print()
-
-def find_longest_path(start, target):
-    longest_path = []
-    s = deque([(start, [start])])
-    i = 0
-    while s:
-        curr, path = s.pop()
-        if curr == target and len(path) > len(longest_path):
-            # print_map(path)
-            longest_path = path
-            print("NEW LONGEST", len(longest_path))
-
-        # if i % 10_000 == 0:
-            # print(path)
-            # input()
-            # print_map(path)
-        
-        DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
-        for d in DIRECTIONS:
-            next_pos = add_tuples(curr, d)
-            if (next_pos in paths or next_pos in slopes) and within_bounds(next_pos) and next_pos not in path:
-            # if next_pos not in path and within_bounds(next_pos):
-                new_path = path + [next_pos]
-                s.append((next_pos, new_path))
-
-    return longest_path - 1
-
-forest = set()
-paths = set()
-slopes = {}
 UP = (-1, 0)
 DOWN = (1, 0)
 LEFT = (0, -1)
 RIGHT = (0, 1)
-def solve_part_1():
-    m = {
-        ">": RIGHT,
-        "<": LEFT,
-        "^": UP,
-        "v": DOWN
-    }
-    ans = 0
-    START = (0, 1)
-    END = (len(lines) - 1, len(lines[0]) - 2)
+DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
+
+START = (0, 1)
+END = (len(lines) - 1, len(lines[0]) - 2)
+
+# Map chars to a direction
+m = {
+    ">": RIGHT,
+    "<": LEFT,
+    "^": UP,
+    "v": DOWN
+}
+
+def parse_map_positions():
+    paths = set()
+    slopes = {}
+
+    # Parse grid positions - find all path and slopes
     for r, row in enumerate(lines):
         for c, ch in enumerate(row):
             curr = (r, c)
-            if ch == "#":
-                forest.add(curr)
-            elif ch == ".":
+            if ch == ".":
                 paths.add(curr)
-            else:
+            elif ch in m:
                 slopes[curr] = m[ch]
     
+    return paths, slopes
 
-
-    DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
-    waypoints = {}
+def construct_graph(paths, slopes, is_part_2):
+    intersections = {}
     for p in paths:
         num_connections = 0
-        connections = set()
         for d in DIRECTIONS:
             next_pos = add_tuples(p, d)
+            if not is_part_2 and next_pos in slopes and d != slopes[next_pos]:
+                continue
             if next_pos in paths or next_pos in slopes:
-                connections.add(next_pos)
                 num_connections += 1
         
-        # if len(connections) >= 2:
-        if num_connections > 2 or num_connections == 1:
-            waypoints[p] = num_connections
+        # If we have a start position or an intersection, then keep track of it
+        if num_connections != 2:
+            intersections[p] = num_connections
     
-    for k, v in waypoints.items():
-        print(k, v)
-    
+    # Create state reduced graph by flood filling from every intersection to every other intersection.
+    # We keep track of the cost to travel between states, so no graph cost data is lost
     graph = {}
-    for w in waypoints:
-        q = deque([(w, 0)])
+    for intersection in intersections:
+        s = deque([(intersection, 0)])
         v = set()
-        graph[w] = []
+        graph[intersection] = []
 
-        while q:
-            curr, dist = q.pop()
+        while s:
+            curr, dist = s.pop()
             v.add(curr)
 
-            if curr in waypoints and curr != w:
-                graph[w].append((curr, dist))
+            # We are about to expand another intersection node - we don't want to do this
+            if curr in intersections and curr != intersection:
+                graph[intersection].append((curr, dist))
                 continue
 
+            # Continue travelling in the direction we have not yet explored
             for d in DIRECTIONS:
                 next_pos = add_tuples(curr, d)
+                if not is_part_2 and next_pos in slopes and d != slopes[next_pos]:
+                    continue
                 if (next_pos in paths or next_pos in slopes) and next_pos not in v:
-                    q.append((next_pos, dist + 1))
+                    s.append((next_pos, dist + 1))
+    
+    return graph
 
-    # print("GRAPH")
-    # for k, v in graph.items():
-    #     print(k, v)
-
+def dfs(graph, paths, slopes):
+    # Perform a DFS from the start to the other waypoints/intersections and keep track of the highest
+    # cost path so far. This still takes a few seconds but is viable because of the state reduction.
     highest_cost = 0
     s = deque([(START, 0, set())])
-    i = 0
     while s:
         curr, curr_cost, v = s.pop()
-        if curr == END and curr_cost > highest_cost:
-            # print_map(path)
-            highest_cost = curr_cost
-            print("NEW LONGEST", curr_cost)
-        
         v.add(curr)
 
-        # if i % 10_000 == 0:
-            # print(path)
-            # input()
-            # print_map(path)
+        # We have a path that has reached the end and it is a longer one than we know about
+        if curr == END and curr_cost > highest_cost:
+            highest_cost = curr_cost
         
-        # print(curr)
+        # Continue traversing
         for neighbour, cost in graph[curr]:
-            if (neighbour in paths or neighbour in slopes) and within_bounds(neighbour) and neighbour not in v:
-            # if next_pos not in path and within_bounds(next_pos):
+            if (neighbour in paths or neighbour in slopes) and neighbour not in v:
                 new_path = curr_cost + cost
                 s.append((neighbour, new_path, v | {neighbour} ))
 
     return highest_cost
 
-    return 0
-    # longest = find_longest_path(START, END)
-    # print(longest)
-    # return len(longest)
-            
-
-    q = deque([(START, set())])
-
-    longest = 0
-    longest_v = set()
-    while q:
-        # print(len(q))
-        curr, v = q.popleft()
-
-        # print_map(v)
-        if len(v) > longest and curr == END:
-            longest = len(v)
-            longest_v = v
-            print_map(v)
-            print("Longest", longest)
-
-        for d in DIRECTIONS:
-            next_pos = add_tuples(curr, d)
-            if (next_pos in paths or next_pos in slopes) and within_bounds(next_pos) and next_pos not in v and next_pos not in q:
-                # if next_pos in slopes:
-                #     if d != slopes[next_pos]:
-                #         continue
-                q.append((next_pos, v | {curr}))
+def solve_part_1():
+    paths, slopes = parse_map_positions()
+    graph = construct_graph(paths, slopes, is_part_2=False)
+    longest_dist = dfs(graph, paths, slopes)
     
-    print_map(longest_v)
-
-
-
-
-
-
-
-    return longest
-
+    return longest_dist
 
 def solve_part_2():
-    ans = 0
-    for line in lines:
-        pass
-    return ans
-
+    paths, slopes = parse_map_positions()
+    graph = construct_graph(paths, slopes, is_part_2=True)
+    longest_dist = dfs(graph, paths, slopes)
+    
+    return longest_dist
 
 print(f"Part 1 answer: {solve_part_1()}")
-# != 6149
-# > 6223
 print(f"Part 2 answer: {solve_part_2()}")
-
