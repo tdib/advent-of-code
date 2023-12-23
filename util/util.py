@@ -83,7 +83,7 @@ def multiply_vectors(v1: tuple[int], v2: tuple[int]) -> tuple[int]:
     """
     return tuple(elem1 * elem2 for elem1, elem2 in zip(v1, v2))
 
-def fill_volume_3d(pos1: tuple[int], pos2: tuple[int]) -> set[tuple[int]]:
+def fill_volume_3d(pos1: tuple[int, int, int], pos2: tuple[int, int, int]) -> set[tuple[int, int, int]]:
     """
     Given two positions in 3d space, fills all positions that exist between the two points.
     For example, given (0, 0, 0), and (0, 1, 2), the function returns
@@ -100,7 +100,7 @@ def fill_volume_3d(pos1: tuple[int], pos2: tuple[int]) -> set[tuple[int]]:
     
     return filled
 
-def fill_volume_2d(pos1: tuple[int], pos2: tuple[int]) -> set[tuple[int]]:
+def fill_volume_2d(pos1: tuple[int, int], pos2: tuple[int, int]) -> set[tuple[int, int]]:
     """
     Given two positions in 2d space, fills all positions that exist between the two points.
     For example, given (0, 0), and (2, 2), the function returns
@@ -116,7 +116,22 @@ def fill_volume_2d(pos1: tuple[int], pos2: tuple[int]) -> set[tuple[int]]:
     
     return filled
 
-def search(map: list[str], start: tuple[int], position_predicate: Callable[[tuple[int]], bool] = lambda x: x, target: tuple[int] = None, mode: str = "bfs"):
+class SearchResult:
+    """
+    Defines a search result that contains information about the search including the path taken from start to finish, the
+    distances from the start for each node, and the nodes that were visited.
+    """
+    def __init__(self, path: list[tuple[int, int]], dists: dict[tuple[int, int], int], visited: set[tuple[int, int]]):
+        self.path = path
+        self.dists = dists
+        self.visited = visited
+    
+    def __iter__(self):
+        yield self.path
+        yield self.dists
+        yield self.visited
+
+def search(map: list[str], start: tuple[int, int], position_predicate: Callable[[tuple[int, int]], bool] = lambda x: x, target: tuple[int, int] = None, mode: str = "bfs") -> SearchResult:
     """
     Given a list of strings representing the rows in a map, performs a search from the start position.
 
@@ -133,6 +148,7 @@ def search(map: list[str], start: tuple[int], position_predicate: Callable[[tupl
     visited = set()
     dists = { start: 0 }
     curr_pos = start
+    predecessors = { start: None }
     while queue:
         if mode == "bfs":
             curr_pos = queue.popleft()
@@ -144,19 +160,29 @@ def search(map: list[str], start: tuple[int], position_predicate: Callable[[tupl
         visited.add(curr_pos)
 
         if curr_pos == target:
-            return visited, dists
+            path = []
+            while curr_pos is not None:
+                path.append(curr_pos)
+                curr_pos = predecessors[curr_pos]
+            
+            return SearchResult(list(reversed(path)), dists, visited)
 
         for direction in DIRECTIONS:
             next_pos = add_vectors(curr_pos, direction)
             if next_pos not in visited and within_bounds(next_pos, map) and position_predicate(next_pos):
                 queue.append(next_pos)
                 dists[next_pos] = dists[curr_pos] + 1
+                predecessors[next_pos] = curr_pos
         
-    return visited, dists
+    path = []
+    while curr_pos is not None:
+        path.append(curr_pos)
+        curr_pos = predecessors[curr_pos]
+    return SearchResult(list(reversed(path)), dists, visited)
 
 
 # Simply checks if the given position falls within the bounds of the provided array
-def within_bounds(pos: tuple[int], arr: list[str]) -> bool:
+def within_bounds(pos: tuple[int, int], arr: list[str]) -> bool:
     """
     Checks if the given position falls within the bounds of the provided array.
 
@@ -165,7 +191,7 @@ def within_bounds(pos: tuple[int], arr: list[str]) -> bool:
     row, col = pos
     return row >= 0 and row < len(arr) and col >= 0 and col < len(arr[0])
 
-def read_grid_positions(grid: list[str], chars: list[str]) -> list[set[tuple]]:
+def read_grid_positions(grid: list[str], chars: list[str]) -> list[set[tuple[int, int]]]:
     """
     Given a list of strings representing a grid, and a list of chars to search for, returns a
     list of positions of the given characters.
