@@ -34,56 +34,56 @@ symbol_to_dir = { v: k for k, v in dir_to_symbol.items() }
 WALL = "#"
 EMPTY = "."
 
-def limit_vector(vector: tuple[int], magnitude: int, use_abs_value: bool = False):
+def limit_tuple(tup: tuple[int], magnitude: int, use_abs_value: bool = False):
     """
-    Given an n-dimensional vector, limit the magnitude of its components. For example, given
+    Given an n-dimensional tuple, limit the magnitude of its components. For example, given
     (1, 6, 3) with magnitude 5, the output would be (1, 5, 3).
 
     By default, the function ignores negatives, so (1, -6, 3) with magnitude 5 would output (1, -6, 3).
     If `use_abs_value` is set to true, the output would instead be (1, -5, 3).
     """
     if use_abs_value:
-        return tuple(-1 * min(abs(v), magnitude) if v < 0 else min(abs(v), magnitude) for v in vector)
+        return tuple(-1 * min(abs(t), magnitude) if t < 0 else min(abs(t), magnitude) for t in tup)
     else:
-        return tuple(min(v, magnitude) for v in vector)
+        return tuple(min(t, magnitude) for t in tup)
 
-def add_vectors(v1: tuple[int], v2: tuple[int]) -> tuple[int]:
+def add_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     """
-    Add two n-dimensional vectors.
+    Add two n-dimensional tuples.
 
     ```
-    v1 = (1, 2, 3)
-    v2 = (0, 6, -2)
-    assert add_vectors(v1, v2) == (1, 8, 1)
+    t1 = (1, 2, 3)
+    t2 = (0, 6, -2)
+    assert add_tuples(t1, t2) == (1, 8, 1)
     ```
     """
-    return tuple(elem1 + elem2 for elem1, elem2 in zip(v1, v2))
+    return tuple(elem1 + elem2 for elem1, elem2 in zip(t1, t2))
 
-def subtract_vectors(v1: tuple[int], v2: tuple[int]) -> tuple[int]:
+def subtract_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     """
-    Subtract two n-dimensional vectors.
+    Subtract two n-dimensional tuples.
 
     ```
-    v1 = (1, 2, 3)
-    v2 = (0, 6, -2)
-    assert subtract_vectors(v1, v2) == (1, -4, 5)
+    t1 = (1, 2, 3)
+    t2 = (0, 6, -2)
+    assert subtract_tuples(t1, t2) == (1, -4, 5)
     ```
     """
-    return tuple(elem1 - elem2 for elem1, elem2 in zip(v1, v2))
+    return tuple(elem1 - elem2 for elem1, elem2 in zip(t1, t2))
 
-def multiply_vectors(v1: tuple[int], v2: tuple[int]) -> tuple[int]:
+def multiply_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     """
-    Multiply two n-dimensional vectors.
+    Multiply two n-dimensional tuples.
 
     ```
-    v1 = (1, 2, 3)
-    v2 = (0, 6, -2)
-    assert multiply_vectors(v1, v2) == (0, 12, -6)
+    t1 = (1, 2, 3)
+    t2 = (0, 6, -2)
+    assert multiply_tuples(t1, t2) == (0, 12, -6)
     ```
     """
-    return tuple(elem1 * elem2 for elem1, elem2 in zip(v1, v2))
+    return tuple(elem1 * elem2 for elem1, elem2 in zip(t1, t2))
 
-def fill_volume_3d(pos1: tuple[int, int, int], pos2: tuple[int, int, int]) -> set[tuple[int, int, int]]:
+def fill_volume(pos1: tuple[int, int, int], pos2: tuple[int, int, int]) -> set[tuple[int, int, int]]:
     """
     Given two positions in 3d space, fills all positions that exist between the two points.
     For example, given (0, 0, 0), and (0, 1, 2), the function returns
@@ -100,7 +100,7 @@ def fill_volume_3d(pos1: tuple[int, int, int], pos2: tuple[int, int, int]) -> se
     
     return filled
 
-def fill_volume_2d(pos1: tuple[int, int], pos2: tuple[int, int]) -> set[tuple[int, int]]:
+def fill_area(pos1: tuple[int, int], pos2: tuple[int, int]) -> set[tuple[int, int]]:
     """
     Given two positions in 2d space, fills all positions that exist between the two points.
     For example, given (0, 0), and (2, 2), the function returns
@@ -168,7 +168,7 @@ def search(map: list[str], start: tuple[int, int], position_predicate: Callable[
             return SearchResult(list(reversed(path)), dists, visited)
 
         for direction in DIRECTIONS:
-            next_pos = add_vectors(curr_pos, direction)
+            next_pos = add_tuples(curr_pos, direction)
             if next_pos not in visited and within_bounds(next_pos, map) and position_predicate(next_pos):
                 queue.append(next_pos)
                 dists[next_pos] = dists[curr_pos] + 1
@@ -179,7 +179,6 @@ def search(map: list[str], start: tuple[int, int], position_predicate: Callable[
         path.append(curr_pos)
         curr_pos = predecessors[curr_pos]
     return SearchResult(list(reversed(path)), dists, visited)
-
 
 # Simply checks if the given position falls within the bounds of the provided array
 def within_bounds(pos: tuple[int, int], arr: list[str]) -> bool:
@@ -229,7 +228,7 @@ class Notable:
         self.symbol = symbol
         self.colour = colour
 
-def print_map(grid: list[str], notables: list[Notable] = []):
+def print_map(grid: list[str], notables: list[Notable] = [], print_index: bool = True):
     """
     Print a visualisation of the provided grid. A list of notables may be passed in to display
     different elements in a different colour.
@@ -238,6 +237,8 @@ def print_map(grid: list[str], notables: list[Notable] = []):
     to a position will be printed, and the others ignored. This is only relevant if you have the same position
     in multiple sets (e.g. all_positions and visited_positions).
     """
+    if print_index:
+        print(''.join([str(i)[:1] for i in range(len(grid[0]))]))
     for row_idx, row in enumerate(grid):
         for col_idx, ch in enumerate(row):
             curr = (row_idx, col_idx)
@@ -247,7 +248,7 @@ def print_map(grid: list[str], notables: list[Notable] = []):
                     break
             else:
                 print(ch, end="")
-        print()
+        print(f" {row_idx}" if print_index else "")
     print()
 
 def read_as_chunks(file_name):
@@ -274,3 +275,148 @@ def read_as_single_line(file_name):
     with open(file_name) as f:
         line = f.readline()
     return line
+
+if __name__ == "__main__":
+    ###
+    d(f"{C.BOLD}{C.UNDERLINE}COLOURS & STYLES:{C.ENDC}")
+    d(f"{C.RED}Red{C.ENDC}", end=" ")
+    d(f"{C.ORANGE}Orange{C.ENDC}", end=" ")
+    d(f"{C.YELLOW}Yellow{C.ENDC}", end=" ")
+    d(f"{C.GREEN}Green{C.ENDC}", end=" ")
+    d(f"{C.CYAN}Cyan{C.ENDC}", end=" ")
+    d(f"{C.BLUE}Blue{C.ENDC}", end=" ")
+    d(f"{C.PINK}Pink{C.ENDC}", end=" ")
+    d(f"{C.PURPLE}Purple{C.ENDC}", end=" ")
+    d(f"{C.BOLD}Bold{C.ENDC}", end=" ")
+    d(f"{C.UNDERLINE}Underline{C.ENDC}", end=" ")
+    d(f"{C.ITALIC}Italic{C.ENDC}")
+    d()
+
+    ###
+    d(f"{C.BOLD}{C.UNDERLINE}DIRECTIONS:{C.ENDC}")
+    d(f"Up:    {dir_to_symbol[UP]} {UP} {dir_to_str[UP]}")
+    d(f"Down:  {dir_to_symbol[DOWN]} {DOWN}  {dir_to_str[DOWN]}")
+    d(f"Left:  {dir_to_symbol[LEFT]} {LEFT} {dir_to_str[LEFT]}")
+    d(f"Right: {dir_to_symbol[RIGHT]} {RIGHT}  {dir_to_str[RIGHT]}")
+    d()
+
+    ###
+    d(f"{C.BOLD}{C.UNDERLINE}TUPLE MANIPULATION:{C.ENDC}")
+    magnitude = 50
+
+    t = (1, 56, 3)
+    d(f"Limiting {t=} to a magnitude of {magnitude}:                 {t} -> {limit_tuple(t, magnitude)}")
+
+    t = (1, -56, 3)
+    d(f"Limiting {t=} to a magnitude of {magnitude} (w/ abs value): {t} -> {limit_tuple(t, magnitude, use_abs_value=True)}")
+
+    t1 = (1, 2, 3)
+    t2 = (5, -6, 0)
+    d(f"Adding tuples:      {t1} + {t2} = {add_tuples(t1, t2)}")
+    d(f"Subtracting tuples: {t1} - {t2} = {subtract_tuples(t1, t2)}")
+    d(f"Multiplying tuples: {t1} * {t2} = {multiply_tuples(t1, t2)}")
+
+    d()
+
+    ###
+    d(f"{C.BOLD}{C.UNDERLINE}POSITION FILLING:{C.ENDC}")
+    p1 = (0, 0, 0)
+    p2 = (0, 1, 2)
+    d(f"Volume fill: {p1}, {p2} =")
+    d(f"             {sorted(fill_volume(p1, p2))}")
+
+    p1 = (0, 0)
+    p2 = (2, 2)
+    d(f"Area fill:   {p1}, {p2} =")
+    d(f"             {sorted(fill_area(p1, p2))}")
+    d()
+
+    ###
+    d(f"{C.BOLD}{C.UNDERLINE}INPUT PARSING:{C.ENDC}")
+    line = read_as_single_line("single_line_sample.txt")
+    d(f"Single line: read_as_single_line(\"file.txt\") =")
+    d(f"             {line}")
+
+    lines = read_as_lines("grid_sample.txt")
+    d(f"Multi-line:  read_as_lines(\"file.txt\") =")
+    for line in lines:
+        d(f"             {line}")
+    
+    chunks = read_as_chunks("chunks_sample.txt")
+    d(f"Chunks:      read_as_chunks(\"file.txt\") =")
+    for chunk in chunks:
+        d(f"             {chunk}")
+
+    d()
+
+    ###
+    d(f"{C.BOLD}{C.UNDERLINE}GRID PARSING:{C.ENDC}")
+    grid = lines
+    start, end, walls = read_grid_positions(grid, ["S", "E", "#"])
+    d(f"Parse positions: start, end, walls = read_grid_positions(grid, [\"S\", \"E\", \"#\"])")
+    d(f"                 {start=}, {end=}")
+    d("                 walls={", end="")
+    i = 0
+    for idx, wall in enumerate(walls):
+        if i == 8:
+            i = 0
+            d()
+            d("                       ", end="")
+        if idx == len(walls) - 1:
+            d(f"{wall}", end="}")
+            d()
+        else:
+            d(f"{wall}", end=", ")
+        i += 1
+    
+    ###
+    d(f"{C.BOLD}{C.UNDERLINE}MAP PRINTING:{C.ENDC}")
+    d("print_map(grid)")
+    print_map(grid)
+
+    d("""print_map(grid, [
+    Notable(positions=start, colour=C.GREEN),
+    Notable(positions=end, colour=C.RED),
+    Notable(positions=walls, symbol="█", colour=C.ENDC)
+])""")
+    print_map(grid, [
+        Notable(positions=start, colour=C.GREEN),
+        Notable(positions=end, colour=C.RED),
+        Notable(positions=walls, symbol="█", colour=C.ENDC)
+    ])
+
+    ###
+    d(f"{C.BOLD}{C.UNDERLINE}SEARCHING:{C.ENDC}")
+    start = list(start)[0]
+    end = list(end)[0]
+
+    d("BFS - printing visited nodes")
+    d("""res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="bfs")
+print_map(grid, [
+    Notable(positions=res.visited)
+])""")
+    res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="bfs")
+    print_map(grid, [
+        Notable(positions=res.visited)
+    ])
+
+    d("DFS - printing visited nodes")
+    d("""res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="dfs")
+print_map(grid, [
+    Notable(positions=res.visited)
+])""")
+    res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="dfs")
+    print_map(grid, [
+        Notable(positions=res.visited)
+    ])
+
+    d("BFS - printing backtracked path")
+    d("""res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="bfs")
+print_map(grid, [
+    Notable(positions=res.path)
+])""")
+    res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="bfs")
+    print_map(grid, [
+        Notable(positions=res.path)
+    ])
+
