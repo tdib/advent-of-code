@@ -99,7 +99,7 @@ for i in range((len(dists)+1) // 2):
     subset_1 = set(combination)
     subset_2 = set(dists) - subset_1
     # Run two searches and check if this combination of visited is higher than we currently have
-    max_pressure = max(max_pressure, dfs(26, visited=subset_1) + dfs(26, visited=subset_2))
+    max_pressure = max(max_pressure, dfs(26, opened_valves=subset_1) + dfs(26, opened_valves=subset_2))
 
 
 print(f'Part 2 answer: {max_pressure}')
