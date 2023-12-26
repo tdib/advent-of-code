@@ -1,5 +1,6 @@
 from typing import Callable
 from collections import deque
+import re
 
 class C:
     RED = "\033[91m"
@@ -34,7 +35,13 @@ symbol_to_dir = { v: k for k, v in dir_to_symbol.items() }
 WALL = "#"
 EMPTY = "."
 
-def limit_tuple(tup: tuple[int], magnitude: int, use_abs_value: bool = False):
+def get_nums(line: str) -> list[int]:
+    """
+    Given a line with numbers, return a list of all numbers (negatives included).
+    """
+    return list(map(int, re.findall(r"(-?\d+)", line)))
+
+def limit_tuple(tup: tuple[int], magnitude: int, use_abs_value: bool = False) -> tuple[int]:
     """
     Given an n-dimensional tuple, limit the magnitude of its components. For example, given
     (1, 6, 3) with magnitude 5, the output would be (1, 5, 3).
@@ -419,4 +426,10 @@ print_map(grid, [
     print_map(grid, [
         Notable(positions=res.path)
     ])
+
+    ###
+    d(f"{C.BOLD}{C.UNDERLINE}GENERAL UTIL:{C.ENDC}")
+    s = "This is my 1 line with -3 numbers and 3 something 44."
+    nums = get_nums(s)
+    d(f"{s} -> {nums}")
 
