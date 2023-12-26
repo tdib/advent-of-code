@@ -1,1 +1,1 @@
-from networkx import*;g=Graph();[g.add_edge(line.split(":")[0],conn)for line in open("input.txt").readlines()for conn in line.split(":")[1].split()];g.remove_edges_from(minimum_edge_cut(g));a,b=map(len,connected_components(g));print(a*b)
+from networkx import*;g=Graph();[g.add_edge(l.split(":")[0],c)for l in open("input.txt").readlines()for c in l.split(":")[1].split()];g.remove_edges_from(minimum_edge_cut(g));a,b=map(len,connected_components(g));print(a*b)
