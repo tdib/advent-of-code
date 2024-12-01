@@ -58,9 +58,5 @@ def solve_part_1():
 
     return hailstones
 
-def solve_part_2():
-    pass
-
 print(f"Part 1 answer: {solve_part_1()}")
-print(f"Part 2 answer: {solve_part_2()}")
 
