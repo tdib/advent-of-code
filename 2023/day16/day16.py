@@ -99,15 +99,14 @@ def solve_part_2():
     left_starts = [((row, 0), RIGHT) for row in range(len(lines))]
     right_starts = [((row, len(lines[0])-1), LEFT) for row in range(len(lines))]
     starts = [*top_starts, *bot_starts, *left_starts, *right_starts]
-    curr_beams = starts
 
-    curr_max_energised = 0
+    max_energised = 0
     for start in starts:
-        energised = set()
         v = set()
+        energised = set()
         has_change = True
         curr_beams = [start]
-        while len(curr_beams) and has_change:
+        while has_change:
             temp = []
             has_change = False
             for curr_beam in curr_beams[:]:
@@ -123,20 +122,14 @@ def solve_part_2():
 
                 dir_map = m[curr_symbol]
                 next_dir = [d[1] for d in dir_map if d[0] == curr_dir]
-                if len(next_dir) == 2:
-                    for n in next_dir:
-                        next_pos = add_tuples(curr_pos, n)
-                        if within_bounds(next_pos):
-                            temp.append((next_pos, n))
-                else:
-                    next_dir = next_dir[0]
-                    next_pos = add_tuples(curr_pos, next_dir)
+                for n in next_dir:
+                    next_pos = add_tuples(curr_pos, n)
                     if within_bounds(next_pos):
-                        temp.append((next_pos, next_dir))
+                        temp.append((next_pos, n))
                 curr_beams = temp
-        curr_max_energised = max(curr_max_energised, len(energised))
+        max_energised = max(max_energised, len(energised))
 
-    return curr_max_energised
+    return max_energised
 
 
 print(f"Part 1 answer: {solve_part_1()}")
