@@ -2,7 +2,7 @@ import java.io.File
 import kotlin.math.abs
 
 val (a, b) = File("input.txt").readLines()
-    .map { it.split(Regex("\\s+")).map { it.toInt() } }
+    .map { it.split("   ").map { it.toInt() } }
     .let { it.map { it[0] }.sorted() to it.map { it[1] }.sorted() }
 
 fun solvePart1() =

@@ -1,2 +1,2 @@
-val(a,b)=java.io.File("input.txt").readLines().map{it.split(Regex("\\s+")).map{it.toInt()}}.let{it.map{it[0]}.sorted()to it.map{it[1]}.sorted()}
+val(a,b)=java.io.File("input.txt").readLines().map{it.split("   ").map{it.toInt()}}.let{it.map{it[0]}.sorted()to it.map{it[1]}.sorted()}
 print("Part 1 answer: ${a.zip(b).sumOf{(x,y)->kotlin.math.abs(x-y)}}\nPart 2 answer: ${a.fold(0){x,k->x+k*(b.groupingBy{it}.eachCount()[k]?:0)}}")
