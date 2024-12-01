@@ -22,7 +22,6 @@ fun solvePart1(): Int {
 }
 
 fun solvePart2(): Int {
-    var ret = 0
     val r = Regex("\\d+")
     val listA = mutableListOf<Int>()
     val listB = mutableListOf<Int>()
@@ -34,11 +33,9 @@ fun solvePart2(): Int {
     }
 
     val counts = listB.groupingBy { it }.eachCount()
-    for (item in listA) {
-        ret += item * counts.getOrDefault(item, 0)
+    return listA.fold(0) { acc, item ->
+        acc + item * counts.getOrDefault(item, 0)
     }
-
-    return ret
 }
 
 println("Part 1 answer: ${solvePart1()}")
