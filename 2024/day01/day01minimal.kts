@@ -1,8 +1,7 @@
 import java.io.File
 import kotlin.math.abs
 
-val l = File("test.txt").readLines()
-val (a, b) = l
+val (a, b) = File("input.txt").readLines()
     .map { it.split(Regex("\\s+")).map { it.toInt() } }
     .let { it.map { it[0] }.sorted() to it.map { it[1] }.sorted() }
 
