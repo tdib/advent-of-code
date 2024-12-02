@@ -8,10 +8,10 @@ fun f(n: List<Int>): Boolean {
 val n = File("input.txt").readLines().map { it.split(" ").map { it.toInt() }}
 
 fun solvePart1() =
-    n.count { f(it) }
+    n.count(::f)
 
 fun solvePart2() =
-    n.count { List(it.size) { j -> it.filterIndexed { i, _ -> i != j } }.any { f(it) } }
+    n.count { List(it.size) { j -> it.filterIndexed { i, _ -> i != j } }.any(::f) }
 
 println("Part 1 answer: ${solvePart1()}")
 println("Part 2 answer: ${solvePart2()}")
