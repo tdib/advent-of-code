@@ -14,10 +14,7 @@ fun solvePart1() =
     l.count { f(g(it)) }
 
 fun solvePart2() =
-    l.count {
-        val n = g(it)
-        (listOf(n) + List(n.size) { n.filterIndexed { i, _ -> i != it } }).any { f(it) }
-    }
+    l.count { List(g(it).size) { j -> g(it).filterIndexed { i, _ -> i != j } }.any { f(it) } }
 
 println("Part 1 answer: ${solvePart1()}")
 println("Part 2 answer: ${solvePart2()}")
