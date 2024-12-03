@@ -11,23 +11,18 @@ fun solvePart1(): Int {
     }
 }
 
-enum class Instruction {
-    MUL,
-    DO,
-    DONT;
+enum class Instruction(val regexStr: String) {
+    MUL("mul\\((\\d+),(\\d+)\\)"),
+    DO("do\\(\\)"),
+    DONT("don't\\(\\)"),
 }
 
-fun String.toInstruction() = when {
-    this.matches(Regex("mul\\((\\d+),(\\d+)\\)")) -> Instruction.MUL
-    this.matches(Regex("do\\(\\)")) -> Instruction.DO
-    this.matches(Regex("don't\\(\\)")) -> Instruction.DONT
-    else -> null
-}
+fun String.toInstruction() = Instruction.entries.find { this.matches(it.regexStr.toRegex()) }
 
 fun solvePart2(): Int {
     var shouldMultiply = true
-    return lines.sumOf {
-        Regex("mul\\((\\d+),(\\d+)\\)|do\\(\\)|don't\\(\\)").findAll(it)
+    return lines.sumOf { line ->
+        Regex(Instruction.entries.joinToString("|") { it.regexStr }).findAll(line)
             .map { matchResult -> matchResult.groupValues }
             .map { groupValues ->
                 when (groupValues[0].toInstruction()) {
@@ -36,7 +31,7 @@ fun solvePart2(): Int {
                     Instruction.MUL -> if (shouldMultiply) {
                         return@map groupValues[1].toInt() * groupValues[2].toInt()
                     }
-                    else -> throw Exception()
+                    else -> Unit
                 }
                 0
             }
