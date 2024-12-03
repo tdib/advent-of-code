@@ -2,15 +2,6 @@ import java.io.File
 
 val lines = File("input.txt").readLines()
 
-fun solvePart1(): Int {
-    return lines.sumOf {
-        Regex("mul\\((\\d+),(\\d+)\\)").findAll(it)
-            .map { matchResult -> matchResult.groupValues }
-            .map { groupValues -> groupValues[1].toInt() * groupValues[2].toInt() }
-            .sum()
-    }
-}
-
 enum class Instruction(val regexStr: String) {
     MUL("mul\\((\\d+),(\\d+)\\)"),
     DO("do\\(\\)"),
@@ -18,6 +9,15 @@ enum class Instruction(val regexStr: String) {
 }
 
 fun String.toInstruction() = Instruction.entries.find { this.matches(it.regexStr.toRegex()) }
+
+fun solvePart1(): Int {
+    return lines.sumOf {
+        Regex(Instruction.MUL.regexStr).findAll(it)
+            .map { matchResult -> matchResult.groupValues }
+            .map { groupValues -> groupValues[1].toInt() * groupValues[2].toInt() }
+            .sum()
+    }
+}
 
 fun solvePart2(): Int {
     var shouldMultiply = true
