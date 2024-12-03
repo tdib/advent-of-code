@@ -12,7 +12,7 @@ fun solvePart1() =
     l.sumOf {
         Regex(I.M.r).findAll(it)
             .map { it.groupValues.drop(1).map { it.toInt() } }
-            .map { it[1] * it[2] }
+            .map { it[0] * it[1] }
             .sum()
     }
 
@@ -22,12 +22,14 @@ fun solvePart2(): Int {
         Regex(I.entries.joinToString("|") { it.r }).findAll(it)
             .map { it.groupValues }
             .map { g ->
+                var r = 0
                 when (I.entries.find { g[0].matches(it.r.toRegex()) }) {
                     I.Y -> m = 1
                     I.D -> m = 0
+                    I.M -> r = g[1].toInt() * g[2].toInt() * m
                     else -> {}
                 }
-                g[1].toInt() * g[2].toInt() * m
+                r
             }
             .sum()
     }
