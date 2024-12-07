@@ -58,13 +58,9 @@ fun solve(part: Int): Long {
 
 }
 
-fun solvePart1(): Long {
-    return solve(part = 1)
-}
+fun solvePart1() = solve(part = 1)
 
-fun solvePart2(): Long {
-    return solve(part = 2)
-}
+fun solvePart2() = solve(part = 2)
 
 println("Part 1 answer: ${solvePart1()}")
 println("Part 2 answer: ${solvePart2()}")
