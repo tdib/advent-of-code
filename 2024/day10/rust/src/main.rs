@@ -1,8 +1,9 @@
 mod coordinate;
+mod parseable;
 mod topographic_map;
 
-use rust::Parseable;
-use topographic_map::TopographicMapExtensions;
+use crate::topographic_map::TopographicMapExtensions;
+use parseable::Parseable;
 
 use std::collections::HashSet;
 use std::fs::read_to_string;
