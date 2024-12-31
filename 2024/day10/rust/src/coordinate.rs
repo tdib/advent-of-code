@@ -50,21 +50,14 @@ impl Coordinate {
     }
 
     pub fn neighbours(&self, max_rows: usize, max_cols: usize) -> Vec<Coordinate> {
-        let mut neighbours = Vec::new();
-
-        if let Some(up) = self.up() {
-            neighbours.push(up);
-        }
-        if let Some(down) = self.down(max_rows) {
-            neighbours.push(down);
-        }
-        if let Some(left) = self.left() {
-            neighbours.push(left);
-        }
-        if let Some(right) = self.right(max_cols) {
-            neighbours.push(right);
-        }
-
-        neighbours
+        [
+            self.up(),
+            self.down(max_rows),
+            self.left(),
+            self.right(max_cols),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
     }
 }
