@@ -50,7 +50,7 @@ impl TopographicMapExtensions for TopographicMap {
     fn find_paths(
         &self,
         curr_loc: Coordinate,
-        visited: HashSet<Coordinate>,
+        mut visited: HashSet<Coordinate>,
         visited_endpoints: &mut HashSet<Coordinate>,
     ) -> PathResult {
         let curr_map_char = self.get_map_char(&curr_loc);
@@ -62,6 +62,7 @@ impl TopographicMapExtensions for TopographicMap {
             };
         }
 
+        visited.insert(curr_loc.clone());
         let mut total = 0;
         let neighbours = curr_loc.neighbours(self.len(), self.get(0).unwrap().len());
         for neighbour in neighbours {
@@ -70,9 +71,7 @@ impl TopographicMapExtensions for TopographicMap {
             }
             let neighbour_map_char = self.get_map_char(&neighbour);
             if neighbour_map_char == curr_map_char + 1 {
-                let mut visited_mut = visited.clone();
-                visited_mut.insert(neighbour.clone());
-                let sub_results = self.find_paths(neighbour, visited_mut, visited_endpoints);
+                let sub_results = self.find_paths(neighbour, visited.clone(), visited_endpoints);
                 total += sub_results.distinct_paths;
                 visited_endpoints.extend(sub_results.unique_endpoints);
             }
