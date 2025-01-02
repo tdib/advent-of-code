@@ -16,22 +16,15 @@ fn main() {
         .lines()
         .map(|line| line.chars().collect::<Vec<char>>())
         .collect::<Grid>();
-    let map = Map::new(input);
+    let regions = Map::new(input).compute_regions();
 
-    println!("Part 1 answer: {}", solve_part_1(&map));
-    println!("Part 2 answer: {}", solve_part_2(&map));
+    println!("Part 1 answer: {}", solve_part(1, &regions));
+    println!("Part 2 answer: {}", solve_part(2, &regions));
 }
 
-fn solve_part_1(map: &Map) -> usize {
-    map.compute_regions()
+fn solve_part(part: usize, regions: &[Region]) -> usize {
+    regions
         .iter()
-        .map(|region| region.get_area() * region.get_perimeter(1))
-        .sum()
-}
-
-fn solve_part_2(map: &Map) -> usize {
-    map.compute_regions()
-        .iter()
-        .map(|region| region.get_area() * region.get_perimeter(2))
+        .map(|region| region.get_area() * region.get_perimeter(part))
         .sum()
 }
