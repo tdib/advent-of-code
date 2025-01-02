@@ -1,3 +1,7 @@
+mod offset;
+
+use offset::*;
+
 use std::collections::HashSet;
 use std::fs::read_to_string;
 
@@ -19,27 +23,6 @@ struct Map {
     width: usize,
     height: usize,
 }
-struct Offset {
-    row_offset: isize,
-    col_offset: isize,
-}
-const UP: Offset = Offset {
-    row_offset: -1,
-    col_offset: 0,
-};
-const DOWN: Offset = Offset {
-    row_offset: 1,
-    col_offset: 0,
-};
-const LEFT: Offset = Offset {
-    row_offset: 0,
-    col_offset: -1,
-};
-const RIGHT: Offset = Offset {
-    row_offset: 0,
-    col_offset: 1,
-};
-const DIRECTION_OFFSETS: [Offset; 4] = [UP, DOWN, LEFT, RIGHT];
 
 impl Map {
     fn new(grid: Grid) -> Self {
