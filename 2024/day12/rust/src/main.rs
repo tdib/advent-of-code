@@ -149,7 +149,7 @@ impl Region {
             // Scan left to right, counting boundaries on the left and right sides
             while curr_pos.row <= max_row {
                 let mut prev = false;
-                let mut curr = false;
+                let mut curr;
                 // Scan right until we have passed the rightmost column position
                 while curr_pos.col <= max_col + 1 {
                     curr = positions.contains(&curr_pos);
@@ -187,13 +187,106 @@ impl Region {
             // Scan top to bottom, counting boundaries on the top and bottom sides
             while curr_pos.col <= max_col {
                 let mut prev = false;
-                let mut curr = false;
+                let mut curr;
                 // Scan right until we have passed the rightmost column position
                 while curr_pos.row <= max_row + 1 {
                     curr = positions.contains(&curr_pos);
 
                     if prev != curr {
                         perimeter += 1;
+                        prev = curr;
+                    }
+
+                    curr_pos = curr_pos.offset(&DOWN);
+                }
+                curr_pos = curr_pos.offset(&RIGHT);
+                curr_pos.row = top_start.row;
+            }
+
+            perimeter
+        }
+        let min_row = self.positions.iter().min_by_key(|pos| pos.row).unwrap().row;
+        let max_row = self.positions.iter().max_by_key(|pos| pos.row).unwrap().row;
+        let min_col = self.positions.iter().min_by_key(|pos| pos.col).unwrap().col;
+        let max_col = self.positions.iter().max_by_key(|pos| pos.col).unwrap().col;
+
+        count_left_to_right(&self.positions, min_row, min_col, max_row, max_col)
+            + count_top_to_bottom(&self.positions, min_row, min_col, max_row, max_col)
+    }
+
+    fn get_perimeter2(&self) -> usize {
+        fn count_left_to_right(
+            positions: &HashSet<Position>,
+            min_row: isize,
+            min_col: isize,
+            max_row: isize,
+            max_col: isize,
+        ) -> usize {
+            let left_start = Position {
+                row: min_row,
+                col: min_col,
+            }
+            .offset(&LEFT);
+
+            let mut perimeter = 0;
+            let mut perimeter_locs: HashSet<(Position, bool)> = HashSet::new();
+            let mut curr_pos = left_start;
+
+            // Scan left to right, counting boundaries on the left and right sides
+            while curr_pos.row <= max_row {
+                let mut prev = false;
+                let mut curr;
+                // Scan right until we have passed the rightmost column position
+                while curr_pos.col <= max_col + 1 {
+                    curr = positions.contains(&curr_pos);
+
+                    if prev != curr {
+                        if !perimeter_locs.contains(&(curr_pos.offset(&UP), curr)) {
+                            perimeter += 1;
+                        }
+                        perimeter_locs.insert((curr_pos, curr));
+                        prev = curr;
+                    }
+
+                    curr_pos = curr_pos.offset(&RIGHT);
+                }
+                curr_pos = curr_pos.offset(&DOWN);
+                curr_pos.col = left_start.col;
+            }
+
+            perimeter
+        }
+
+        fn count_top_to_bottom(
+            positions: &HashSet<Position>,
+            min_row: isize,
+            min_col: isize,
+            max_row: isize,
+            max_col: isize,
+        ) -> usize {
+            let top_start = Position {
+                row: min_row,
+                col: min_col,
+            }
+            .offset(&UP);
+
+            let mut perimeter = 0;
+            let mut curr_pos = top_start;
+            let mut perimeter_locs: HashSet<(Position, bool)> = HashSet::new();
+
+            // Scan top to bottom, counting boundaries on the top and bottom sides
+            while curr_pos.col <= max_col {
+                let mut prev = false;
+                let mut curr;
+                // Scan right until we have passed the rightmost column position
+                while curr_pos.row <= max_row + 1 {
+                    curr = positions.contains(&curr_pos);
+
+                    if prev != curr {
+                        if !perimeter_locs.contains(&(curr_pos.offset(&LEFT), curr)) {
+                            perimeter += 1;
+                        }
+                        perimeter_locs.insert((curr_pos, curr));
                         prev = curr;
                     }
 
@@ -244,5 +337,29 @@ fn solve_part_1(map: &Map) -> usize {
 }
 
 fn solve_part_2(map: &Map) -> usize {
-    todo!()
+    let mut visited_all: HashSet<Position> = HashSet::new();
+    let mut regions: Vec<Region> = Vec::new();
+
+    for (ri, row) in map.grid.iter().enumerate() {
+        for ci in 0..row.len() {
+            let curr_position = Position {
+                row: ri as isize,
+                col: ci as isize,
+            };
+            if visited_all.contains(&curr_position) {
+                continue;
+            } else {
+                let region_positions = flood_fill(map, &curr_position);
+                visited_all.extend(&region_positions);
+                regions.push(Region {
+                    positions: region_positions,
+                });
+            }
+        }
+    }
+
+    regions
+        .iter()
+        .map(|region| region.get_area() * region.get_perimeter2())
+        .sum()
 }
