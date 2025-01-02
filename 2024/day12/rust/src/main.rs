@@ -1,8 +1,10 @@
 mod map;
 mod offset;
+mod position;
 
 use map::*;
 use offset::*;
+use position::*;
 
 use std::collections::HashSet;
 use std::fs::read_to_string;
@@ -17,35 +19,6 @@ fn main() {
 
     println!("Part 1 answer: {}", solve_part_1(&map));
     println!("Part 2 answer: {}", solve_part_2(&map));
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub struct Position {
-    row: isize,
-    col: isize,
-}
-
-impl Position {
-    fn offset(&self, offset: &Offset) -> Self {
-        Self {
-            row: self.row + offset.row_offset,
-            col: self.col + offset.col_offset,
-        }
-    }
-
-    fn neighbours(&self, map: &Map) -> Vec<Position> {
-        DIRECTION_OFFSETS
-            .iter()
-            .flat_map(|direction| {
-                let neighbour_dir = self.offset(direction);
-                if map.within_bounds(&neighbour_dir) {
-                    Some(neighbour_dir)
-                } else {
-                    None
-                }
-            })
-            .collect()
-    }
 }
 
 pub struct Region {
