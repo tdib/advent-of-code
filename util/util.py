@@ -1,10 +1,11 @@
-from typing import Callable
-from collections import deque
-from pathlib import Path
 import inspect
 import re
+from collections import deque
+from pathlib import Path
+from typing import Callable
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
 
 class C:
     RED = "\033[91m"
@@ -22,6 +23,7 @@ class C:
 
     ENDC = "\033[0m"
 
+
 # Alias print to d() to allow for quicker typing :^)
 d = print
 
@@ -36,13 +38,14 @@ RIGHT = (0, 1)
 DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
 MOORE_DIRECTIONS = [UP, UP_LEFT, UP_RIGHT, DOWN, DOWN_LEFT, DOWN_RIGHT, LEFT, RIGHT]
 
-dir_to_str = { UP: "up", DOWN: "down", LEFT: "left", RIGHT: "right" }
+dir_to_str = {UP: "up", DOWN: "down", LEFT: "left", RIGHT: "right"}
 
-dir_to_symbol = { UP: "^", DOWN: "v", LEFT: "<", RIGHT: ">" }
-symbol_to_dir = { v: k for k, v in dir_to_symbol.items() }
+dir_to_symbol = {UP: "^", DOWN: "v", LEFT: "<", RIGHT: ">"}
+symbol_to_dir = {v: k for k, v in dir_to_symbol.items()}
 
 WALL = "#"
 EMPTY = "."
+
 
 def get_nums(line: str) -> list[int]:
     """
@@ -50,7 +53,10 @@ def get_nums(line: str) -> list[int]:
     """
     return list(map(int, re.findall(r"(-?\d+)", line)))
 
-def limit_tuple(tup: tuple[int], magnitude: int, use_abs_value: bool = False) -> tuple[int]:
+
+def limit_tuple(
+    tup: tuple[int], magnitude: int, use_abs_value: bool = False
+) -> tuple[int]:
     """
     Given an n-dimensional tuple, limit the magnitude of its components. For example, given
     (1, 6, 3) with magnitude 5, the output would be (1, 5, 3).
@@ -59,9 +65,13 @@ def limit_tuple(tup: tuple[int], magnitude: int, use_abs_value: bool = False) ->
     If `use_abs_value` is set to true, the output would instead be (1, -5, 3).
     """
     if use_abs_value:
-        return tuple(-1 * min(abs(t), magnitude) if t < 0 else min(abs(t), magnitude) for t in tup)
+        return tuple(
+            -1 * min(abs(t), magnitude) if t < 0 else min(abs(t), magnitude)
+            for t in tup
+        )
     else:
         return tuple(min(t, magnitude) for t in tup)
+
 
 def add_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     """
@@ -75,6 +85,7 @@ def add_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     """
     return tuple(elem1 + elem2 for elem1, elem2 in zip(t1, t2))
 
+
 def subtract_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     """
     Subtract two n-dimensional tuples.
@@ -86,6 +97,7 @@ def subtract_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     ```
     """
     return tuple(elem1 - elem2 for elem1, elem2 in zip(t1, t2))
+
 
 def multiply_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     """
@@ -99,7 +111,10 @@ def multiply_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     """
     return tuple(elem1 * elem2 for elem1, elem2 in zip(t1, t2))
 
-def fill_volume(pos1: tuple[int, int, int], pos2: tuple[int, int, int]) -> set[tuple[int, int, int]]:
+
+def fill_volume(
+    pos1: tuple[int, int, int], pos2: tuple[int, int, int]
+) -> set[tuple[int, int, int]]:
     """
     Given two positions in 3d space, fills all positions that exist between the two points.
     For example, given (0, 0, 0), and (0, 1, 2), the function returns
@@ -113,8 +128,9 @@ def fill_volume(pos1: tuple[int, int, int], pos2: tuple[int, int, int]) -> set[t
         for y in range(y1, y2 + 1):
             for z in range(z1, z2 + 1):
                 filled.add((x, y, z))
-    
+
     return filled
+
 
 def fill_area(pos1: tuple[int, int], pos2: tuple[int, int]) -> set[tuple[int, int]]:
     """
@@ -129,25 +145,39 @@ def fill_area(pos1: tuple[int, int], pos2: tuple[int, int]) -> set[tuple[int, in
     for x in range(x1, x2 + 1):
         for y in range(y1, y2 + 1):
             filled.add((x, y))
-    
+
     return filled
+
 
 class SearchResult:
     """
     Defines a search result that contains information about the search including the path taken from start to finish, the
     distances from the start for each node, and the nodes that were visited.
     """
-    def __init__(self, path: list[tuple[int, int]], dists: dict[tuple[int, int], int], visited: set[tuple[int, int]]):
+
+    def __init__(
+        self,
+        path: list[tuple[int, int]],
+        dists: dict[tuple[int, int], int],
+        visited: set[tuple[int, int]],
+    ):
         self.path = path
         self.dists = dists
         self.visited = visited
-    
+
     def __iter__(self):
         yield self.path
         yield self.dists
         yield self.visited
 
-def search(map: list[str], start: tuple[int, int], position_predicate: Callable[[tuple[int, int]], bool] = lambda x: x, target: tuple[int, int] = None, mode: str = "bfs") -> SearchResult:
+
+def search(
+    map: list[str],
+    start: tuple[int, int],
+    position_predicate: Callable[[tuple[int, int]], bool] = lambda x: x,
+    target: tuple[int, int] = None,
+    mode: str = "bfs",
+) -> SearchResult:
     """
     Given a list of strings representing the rows in a map, performs a search from the start position.
 
@@ -162,16 +192,18 @@ def search(map: list[str], start: tuple[int, int], position_predicate: Callable[
     """
     queue = deque([start])
     visited = set()
-    dists = { start: 0 }
+    dists = {start: 0}
     curr_pos = start
-    predecessors = { start: None }
+    predecessors = {start: None}
     while queue:
         if mode == "bfs":
             curr_pos = queue.popleft()
         elif mode == "dfs":
             curr_pos = queue.pop()
         else:
-            raise RuntimeError(f"Mode {mode} was not recognised as a valid search type.")
+            raise RuntimeError(
+                f"Mode {mode} was not recognised as a valid search type."
+            )
 
         visited.add(curr_pos)
 
@@ -180,21 +212,26 @@ def search(map: list[str], start: tuple[int, int], position_predicate: Callable[
             while curr_pos is not None:
                 path.append(curr_pos)
                 curr_pos = predecessors[curr_pos]
-            
+
             return SearchResult(list(reversed(path)), dists, visited)
 
         for direction in DIRECTIONS:
             next_pos = add_tuples(curr_pos, direction)
-            if next_pos not in visited and within_bounds(next_pos, map) and position_predicate(next_pos):
+            if (
+                next_pos not in visited
+                and within_bounds(next_pos, map)
+                and position_predicate(next_pos)
+            ):
                 queue.append(next_pos)
                 dists[next_pos] = dists[curr_pos] + 1
                 predecessors[next_pos] = curr_pos
-        
+
     path = []
     while curr_pos is not None:
         path.append(curr_pos)
         curr_pos = predecessors[curr_pos]
     return SearchResult(list(reversed(path)), dists, visited)
+
 
 # Simply checks if the given position falls within the bounds of the provided array
 def within_bounds(pos: tuple[int, int], arr: list[str]) -> bool:
@@ -206,7 +243,10 @@ def within_bounds(pos: tuple[int, int], arr: list[str]) -> bool:
     row, col = pos
     return row >= 0 and row < len(arr) and col >= 0 and col < len(arr[0])
 
-def read_grid_positions(grid: list[str], chars: list[str]) -> list[set[tuple[int, int]]]:
+
+def read_grid_positions(
+    grid: list[str], chars: list[str]
+) -> list[set[tuple[int, int]]]:
     """
     Given a list of strings representing a grid, and a list of chars to search for, returns a
     list of positions of the given characters.
@@ -231,6 +271,7 @@ def read_grid_positions(grid: list[str], chars: list[str]) -> list[set[tuple[int
                 positions[chars.index(ch)].add((row_idx, col_idx))
     return positions
 
+
 class Notable:
     """
     Defines a "notable" element on a map. For example, given the positions of all "walls" in a map,
@@ -239,10 +280,14 @@ class Notable:
 
     For example, you may wish to print your visited nodes using a different symbol, or in a different colour.
     """
-    def __init__(self, positions: set[tuple[int]], symbol: str = "X", colour: str = C.RED):
+
+    def __init__(
+        self, positions: set[tuple[int]], symbol: str = "X", colour: str = C.RED
+    ):
         self.positions = positions
         self.symbol = symbol
         self.colour = colour
+
 
 def print_map(grid: list[str], notables: list[Notable] = [], print_index: bool = True):
     """
@@ -254,7 +299,7 @@ def print_map(grid: list[str], notables: list[Notable] = [], print_index: bool =
     in multiple sets (e.g. all_positions and visited_positions).
     """
     if print_index:
-        print(''.join([str(i)[:1] for i in range(len(grid[0]))]))
+        print("".join([str(i)[:1] for i in range(len(grid[0]))]))
     for row_idx, row in enumerate(grid):
         for col_idx, ch in enumerate(row):
             curr = (row_idx, col_idx)
@@ -267,6 +312,7 @@ def print_map(grid: list[str], notables: list[Notable] = [], print_index: bool =
         print(f" {row_idx}" if print_index else "")
     print()
 
+
 def read_as_chunks(file_name):
     """
     Given a file that contains portions/chunks separated by newlines, read the input
@@ -275,7 +321,8 @@ def read_as_chunks(file_name):
     with open(file_name) as f:
         chunks = list(map(str.splitlines, f.read().split("\n\n")))
     return chunks
-    
+
+
 def _calling_file():
     """
     Return the filename of the first caller outside the util package.
@@ -287,6 +334,7 @@ def _calling_file():
             return filename
     # fallback: just return util path (should never hit)
     return Path(__file__).resolve()
+
 
 def read_as_lines(file_name, relative=True):
     """
@@ -302,6 +350,7 @@ def read_as_lines(file_name, relative=True):
     with open(path) as f:
         return [line.strip() for line in f]
 
+
 def read_as_single_line(file_name):
     """
     Given a single line file, read the single line into a string
@@ -309,6 +358,7 @@ def read_as_single_line(file_name):
     with open(file_name) as f:
         line = f.readline()
     return line
+
 
 if __name__ == "__main__":
     ###
@@ -339,10 +389,14 @@ if __name__ == "__main__":
     magnitude = 50
 
     t = (1, 56, 3)
-    d(f"Limiting {t=} to a magnitude of {magnitude}:                 {t} -> {limit_tuple(t, magnitude)}")
+    d(
+        f"Limiting {t=} to a magnitude of {magnitude}:                 {t} -> {limit_tuple(t, magnitude)}"
+    )
 
     t = (1, -56, 3)
-    d(f"Limiting {t=} to a magnitude of {magnitude} (w/ abs value): {t} -> {limit_tuple(t, magnitude, use_abs_value=True)}")
+    d(
+        f"Limiting {t=} to a magnitude of {magnitude} (w/ abs value): {t} -> {limit_tuple(t, magnitude, use_abs_value=True)}"
+    )
 
     t1 = (1, 2, 3)
     t2 = (5, -6, 0)
@@ -368,16 +422,16 @@ if __name__ == "__main__":
     ###
     d(f"{C.BOLD}{C.UNDERLINE}INPUT PARSING:{C.ENDC}")
     line = read_as_single_line("single_line_sample.txt")
-    d(f"Single line: read_as_single_line(\"file.txt\") =")
+    d('Single line: read_as_single_line("file.txt") =')
     d(f"             {line}")
 
     lines = read_as_lines("grid_sample.txt")
-    d(f"Multi-line:  read_as_lines(\"file.txt\") =")
+    d('Multi-line:  read_as_lines("file.txt") =')
     for line in lines:
         d(f"             {line}")
-    
+
     chunks = read_as_chunks("chunks_sample.txt")
-    d(f"Chunks:      read_as_chunks(\"file.txt\") =")
+    d('Chunks:      read_as_chunks("file.txt") =')
     for chunk in chunks:
         d(f"             {chunk}")
 
@@ -387,7 +441,7 @@ if __name__ == "__main__":
     d(f"{C.BOLD}{C.UNDERLINE}GRID PARSING:{C.ENDC}")
     grid = lines
     start, end, walls = read_grid_positions(grid, ["S", "E", "#"])
-    d(f"Parse positions: start, end, walls = read_grid_positions(grid, [\"S\", \"E\", \"#\"])")
+    d('Parse positions: start, end, walls = read_grid_positions(grid, ["S", "E", "#"])')
     d(f"                 {start=}, {end=}")
     d("                 walls={", end="")
     i = 0
@@ -402,7 +456,7 @@ if __name__ == "__main__":
         else:
             d(f"{wall}", end=", ")
         i += 1
-    
+
     ###
     d(f"{C.BOLD}{C.UNDERLINE}MAP PRINTING:{C.ENDC}")
     d("print_map(grid)")
@@ -413,11 +467,14 @@ if __name__ == "__main__":
     Notable(positions=end, colour=C.RED),
     Notable(positions=walls, symbol="█", colour=C.ENDC)
 ])""")
-    print_map(grid, [
-        Notable(positions=start, colour=C.GREEN),
-        Notable(positions=end, colour=C.RED),
-        Notable(positions=walls, symbol="█", colour=C.ENDC)
-    ])
+    print_map(
+        grid,
+        [
+            Notable(positions=start, colour=C.GREEN),
+            Notable(positions=end, colour=C.RED),
+            Notable(positions=walls, symbol="█", colour=C.ENDC),
+        ],
+    )
 
     ###
     d(f"{C.BOLD}{C.UNDERLINE}SEARCHING:{C.ENDC}")
@@ -429,34 +486,45 @@ if __name__ == "__main__":
 print_map(grid, [
     Notable(positions=res.visited)
 ])""")
-    res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="bfs")
-    print_map(grid, [
-        Notable(positions=res.visited)
-    ])
+    res = search(
+        grid,
+        start,
+        position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL,
+        target=end,
+        mode="bfs",
+    )
+    print_map(grid, [Notable(positions=res.visited)])
 
     d("DFS - printing visited nodes")
     d("""res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="dfs")
 print_map(grid, [
     Notable(positions=res.visited)
 ])""")
-    res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="dfs")
-    print_map(grid, [
-        Notable(positions=res.visited)
-    ])
+    res = search(
+        grid,
+        start,
+        position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL,
+        target=end,
+        mode="dfs",
+    )
+    print_map(grid, [Notable(positions=res.visited)])
 
     d("BFS - printing backtracked path")
     d("""res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="bfs")
 print_map(grid, [
     Notable(positions=res.path)
 ])""")
-    res = search(grid, start, position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL, target=end, mode="bfs")
-    print_map(grid, [
-        Notable(positions=res.path)
-    ])
+    res = search(
+        grid,
+        start,
+        position_predicate=lambda pos: grid[pos[0]][pos[1]] != WALL,
+        target=end,
+        mode="bfs",
+    )
+    print_map(grid, [Notable(positions=res.path)])
 
     ###
     d(f"{C.BOLD}{C.UNDERLINE}GENERAL UTIL:{C.ENDC}")
     s = "This is my 1 line with -3 numbers and 3 something 44."
     nums = get_nums(s)
     d(f"{s} -> {nums}")
-
