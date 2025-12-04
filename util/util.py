@@ -1,6 +1,10 @@
 from typing import Callable
 from collections import deque
+from pathlib import Path
+import inspect
 import re
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 class C:
     RED = "\033[91m"
@@ -272,13 +276,31 @@ def read_as_chunks(file_name):
         chunks = list(map(str.splitlines, f.read().split("\n\n")))
     return chunks
     
-def read_as_lines(file_name):
+def _calling_file():
     """
-    Given a file that contains numerous lines of the same format, read each line into its own string in a list
+    Return the filename of the first caller outside the util package.
     """
-    with open(file_name) as f:
-        lines = list(map(str.strip, f.readlines()))
-    return lines
+    for frame in inspect.stack():
+        filename = Path(frame.filename).resolve()
+        # Skip util module files
+        if "util" not in filename.parts:
+            return filename
+    # fallback: just return util path (should never hit)
+    return Path(__file__).resolve()
+
+def read_as_lines(file_name, relative=True):
+    """
+    Given a file that contains numerous lines of the same format, read each line into its own string in a list.
+    If relative=True, resolve path relative to the file that called this function.
+    """
+    if relative:
+        caller_dir = _calling_file().parent
+        path = caller_dir / file_name
+    else:
+        path = Path(file_name)
+
+    with open(path) as f:
+        return [line.strip() for line in f]
 
 def read_as_single_line(file_name):
     """
