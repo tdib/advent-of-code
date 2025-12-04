@@ -2,7 +2,7 @@ import inspect
 import re
 from collections import deque
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional, cast
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -55,8 +55,8 @@ def get_nums(line: str) -> list[int]:
 
 
 def limit_tuple(
-    tup: tuple[int], magnitude: int, use_abs_value: bool = False
-) -> tuple[int]:
+    tup: tuple[int, ...], magnitude: int, use_abs_value: bool = False
+) -> tuple[int, ...]:
     """
     Given an n-dimensional tuple, limit the magnitude of its components. For example, given
     (1, 6, 3) with magnitude 5, the output would be (1, 5, 3).
@@ -73,7 +73,7 @@ def limit_tuple(
         return tuple(min(t, magnitude) for t in tup)
 
 
-def add_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
+def add_tuples(t1: tuple[int, ...], t2: tuple[int, ...]) -> tuple[int, ...]:
     """
     Add two n-dimensional tuples.
 
@@ -86,7 +86,7 @@ def add_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     return tuple(elem1 + elem2 for elem1, elem2 in zip(t1, t2))
 
 
-def subtract_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
+def subtract_tuples(t1: tuple[int, ...], t2: tuple[int, ...]) -> tuple[int, ...]:
     """
     Subtract two n-dimensional tuples.
 
@@ -99,7 +99,7 @@ def subtract_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
     return tuple(elem1 - elem2 for elem1, elem2 in zip(t1, t2))
 
 
-def multiply_tuples(t1: tuple[int], t2: tuple[int]) -> tuple[int]:
+def multiply_tuples(t1: tuple[int, ...], t2: tuple[int, ...]) -> tuple[int, ...]:
     """
     Multiply two n-dimensional tuples.
 
@@ -174,8 +174,8 @@ class SearchResult:
 def search(
     map: list[str],
     start: tuple[int, int],
-    position_predicate: Callable[[tuple[int, int]], bool] = lambda x: x,
-    target: tuple[int, int] = None,
+    position_predicate: Callable[[tuple[int, int]], bool] = lambda x: True,
+    target: Optional[tuple[int, int]] = None,
     mode: str = "bfs",
 ) -> SearchResult:
     """
@@ -194,7 +194,7 @@ def search(
     visited = set()
     dists = {start: 0}
     curr_pos = start
-    predecessors = {start: None}
+    predecessors: dict[tuple[int, int], tuple[int, int] | None] = {start: None}
     while queue:
         if mode == "bfs":
             curr_pos = queue.popleft()
@@ -216,7 +216,7 @@ def search(
             return SearchResult(list(reversed(path)), dists, visited)
 
         for direction in DIRECTIONS:
-            next_pos = add_tuples(curr_pos, direction)
+            next_pos = cast(tuple[int, int], add_tuples(curr_pos, direction))
             if (
                 next_pos not in visited
                 and within_bounds(next_pos, map)
@@ -282,7 +282,7 @@ class Notable:
     """
 
     def __init__(
-        self, positions: set[tuple[int]], symbol: str = "X", colour: str = C.RED
+        self, positions: set[tuple[int, int]], symbol: str = "X", colour: str = C.RED
     ):
         self.positions = positions
         self.symbol = symbol
@@ -521,7 +521,7 @@ print_map(grid, [
         target=end,
         mode="bfs",
     )
-    print_map(grid, [Notable(positions=res.path)])
+    print_map(grid, [Notable(positions=set(res.path))])
 
     ###
     d(f"{C.BOLD}{C.UNDERLINE}GENERAL UTIL:{C.ENDC}")
