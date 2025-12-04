@@ -44,10 +44,8 @@ def solve_part_2():
         start_idx = 0
         for i in range(N):
             nums_left = N - i
-            if -nums_left + 1 == 0:
-                segment = nums[start_idx:]
-            else:
-                segment = nums[start_idx : -nums_left + 1]
+            end_idx = len(nums) - nums_left + 1
+            segment = nums[start_idx:end_idx]
             highest_in_segment = max(segment)
             start_idx = nums.index(highest_in_segment, start_idx) + 1
 
