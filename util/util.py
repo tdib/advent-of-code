@@ -22,10 +22,15 @@ class C:
 d = print
 
 UP = (-1, 0)
+UP_LEFT = (-1, -1)
+UP_RIGHT = (-1, 1)
 DOWN = (1, 0)
+DOWN_LEFT = (1, -1)
+DOWN_RIGHT = (1, 1)
 LEFT = (0, -1)
 RIGHT = (0, 1)
 DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
+MOORE_DIRECTIONS = [UP, UP_LEFT, UP_RIGHT, DOWN, DOWN_LEFT, DOWN_RIGHT, LEFT, RIGHT]
 
 dir_to_str = { UP: "up", DOWN: "down", LEFT: "left", RIGHT: "right" }
 
