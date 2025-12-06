@@ -313,27 +313,34 @@ def print_map(grid: list[str], notables: list[Notable] = [], print_index: bool =
     print()
 
 
-def read_as_chunks(file_name):
+def resolve_file_path(file_name, relative):
+    def _calling_file():
+        """
+        Return the filename of the first caller outside the util package.
+        """
+        for frame in inspect.stack():
+            filename = Path(frame.filename).resolve()
+            # Skip util module files
+            if "util" not in filename.parts:
+                return filename
+        # fallback: just return util path (should never hit)
+        return Path(__file__).resolve()
+
+    if relative:
+        caller_dir = _calling_file().parent
+        return caller_dir / file_name
+    else:
+        return Path(file_name)
+
+
+def read_as_chunks(file_name, relative=True):
     """
     Given a file that contains portions/chunks separated by newlines, read the input
     into various chunks.
     """
-    with open(file_name) as f:
+    with open(resolve_file_path(file_name, relative)) as f:
         chunks = list(map(str.splitlines, f.read().split("\n\n")))
     return chunks
-
-
-def _calling_file():
-    """
-    Return the filename of the first caller outside the util package.
-    """
-    for frame in inspect.stack():
-        filename = Path(frame.filename).resolve()
-        # Skip util module files
-        if "util" not in filename.parts:
-            return filename
-    # fallback: just return util path (should never hit)
-    return Path(__file__).resolve()
 
 
 def read_as_lines(file_name, relative=True):
@@ -341,21 +348,15 @@ def read_as_lines(file_name, relative=True):
     Given a file that contains numerous lines of the same format, read each line into its own string in a list.
     If relative=True, resolve path relative to the file that called this function.
     """
-    if relative:
-        caller_dir = _calling_file().parent
-        path = caller_dir / file_name
-    else:
-        path = Path(file_name)
-
-    with open(path) as f:
+    with open(resolve_file_path(file_name, relative)) as f:
         return [line.strip() for line in f]
 
 
-def read_as_single_line(file_name):
+def read_as_single_line(file_name, relative=True):
     """
     Given a single line file, read the single line into a string
     """
-    with open(file_name) as f:
+    with open(resolve_file_path(file_name, relative)) as f:
         line = f.readline()
     return line
 
