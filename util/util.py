@@ -2,9 +2,10 @@ import inspect
 import re
 from collections import deque
 from pathlib import Path
-from typing import Callable, Optional, cast
+from typing import Callable, Iterable, List, Optional, TypeVar, cast
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+T = TypeVar("T")
 
 
 class C:
@@ -110,6 +111,18 @@ def multiply_tuples(t1: tuple[int, ...], t2: tuple[int, ...]) -> tuple[int, ...]
     ```
     """
     return tuple(elem1 * elem2 for elem1, elem2 in zip(t1, t2))
+
+
+def transpose(m: Iterable[Iterable[T]]) -> List[List[T]]:
+    """
+    Transpose a 2d list
+
+    ```
+    a = [[123, 328, 51, 64], [45, 64, 387, 23], [6, 98, 215, 314]]
+    assert transpose(a) == [[123, 45, 6], [328, 64, 98], [51, 387, 215], [64, 23, 314]]
+    ```
+    """
+    return [list(col) for col in zip(*m)]
 
 
 def fill_volume(
@@ -343,13 +356,16 @@ def read_as_chunks(file_name, relative=True):
     return chunks
 
 
-def read_as_lines(file_name, relative=True):
+def read_as_lines(file_name, relative=True, strip_lines=True):
     """
     Given a file that contains numerous lines of the same format, read each line into its own string in a list.
     If relative=True, resolve path relative to the file that called this function.
     """
     with open(resolve_file_path(file_name, relative)) as f:
-        return [line.strip() for line in f]
+        if strip_lines:
+            return [line.strip() for line in f]
+        else:
+            return [line for line in f]
 
 
 def read_as_single_line(file_name, relative=True):
