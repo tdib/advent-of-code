@@ -1,8 +1,5 @@
 # https://adventofcode.com/2025/day/6
 import re
-from collections import defaultdict, deque
-from functools import reduce
-from posixpath import curdir
 
 import util
 from util.util import transpose
