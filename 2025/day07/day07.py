@@ -1,5 +1,7 @@
 # https://adventofcode.com/2025/day/7
 
+from functools import lru_cache
+
 from util.util import (
     DOWN,
     LEFT,
@@ -36,49 +38,38 @@ def solve_part_1():
 
 
 def solve_part_2():
-    def compute_split(position) -> int:
-        """
-        Given a splitting position, compute the number of paths it creates
-        using a cache that stores previously computed values
-        """
-        if position in v:
-            return v[position]
-
-        queue = [
-            add_tuples(position, LEFT),
-            add_tuples(position, RIGHT),
-        ]
-        num = 0
-
-        while len(queue):
-            curr = queue.pop()
-
-            while curr[0] < len(lines):
-                curr = add_tuples(curr, DOWN)
-                if curr in v:
-                    num += v[curr]
-                    break
-
-                if curr in splitters:
-                    result = compute_split(curr)
-                    num += result
-                    v[curr] = result
-                    break
-
-            if curr[0] == len(lines):
-                num += 1
-
-        v[position] = num
-        return num
-
     curr = list(start)[0]
-    v = {}
-
     # Go down until the first split
     while curr not in splitters:
         curr = add_tuples(curr, DOWN)
-
     return compute_split(curr)
+
+
+@lru_cache(None)
+def compute_split(position) -> int:
+    """
+    Given a splitting position, compute the number of paths it creates
+    using a cache that stores previously computed values
+    """
+    queue = [
+        add_tuples(position, LEFT),
+        add_tuples(position, RIGHT),
+    ]
+    num = 0
+
+    while len(queue):
+        curr = queue.pop()
+        while curr[0] < len(lines):
+            curr = add_tuples(curr, DOWN)
+
+            if curr in splitters:
+                num += compute_split(curr)
+                break
+
+        if curr[0] == len(lines):
+            num += 1
+
+    return num
 
 
 print(f"Part 1 answer: {solve_part_1()}")
