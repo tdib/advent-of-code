@@ -153,6 +153,10 @@ def fill_area(pos1: tuple[int, int], pos2: tuple[int, int]) -> set[tuple[int, in
     """
     x1, y1 = pos1
     x2, y2 = pos2
+    if x1 > x2:
+        x1, x2 = x2, x1
+    if y1 > y2:
+        y1, y2 = y2, y1
     filled = set()
 
     for x in range(x1, x2 + 1):
